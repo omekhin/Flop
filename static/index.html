@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0d10">
+<title>Дом</title>
+<style>
+:root{
+  --bg:#0b0d10; --tile:#14171c; --line:#262b33;
+  --text:#eef1f5; --muted:#8a93a0; --faint:#5b636e;
+  --up:#4fd18b; --down:#ff6b6b; --accent:#f2b84b; --cool:#6cb4ff;
+  --r:22px; --gap:clamp(10px,1vw,16px); --pad:clamp(14px,1.4vw,26px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+body{padding:var(--gap);transition:opacity 2s, transform 3s}
+body.night{opacity:.45}
+
+.grid{height:100%;display:grid;gap:var(--gap);
+  grid-template-columns:1.15fr .95fr .9fr 1fr;
+  grid-template-rows:.7fr 2fr .68fr;
+  grid-template-areas:
+   "clock out   home  steps"
+   "money money spend pay"
+   "cal   cal   cal   cal"}
+.tile{background:var(--tile);border-radius:var(--r);padding:var(--pad);
+  position:relative;overflow:hidden;display:flex;flex-direction:column;min-height:0;min-width:0}
+.label{font-size:clamp(11px,.8vw,15px);color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.sub{color:var(--muted);font-size:clamp(13px,.95vw,18px)}
+.faint{color:var(--faint)}
+.stamp{position:absolute;right:var(--pad);top:var(--pad);font-size:clamp(10px,.7vw,13px);color:var(--faint)}
+.stamp.bad{color:var(--down)}
+.up{color:var(--up)} .down{color:var(--down)} .warnc{color:var(--accent)}
+.deg{color:var(--faint);font-weight:200}
+
+/* clock */
+.clock{grid-area:clock;justify-content:center}
+.time{font-size:clamp(60px,6.6vw,132px);font-weight:200;line-height:.9;letter-spacing:-.04em}
+.time .sec{font-size:.3em;color:var(--faint);font-weight:300;margin-left:.15em;vertical-align:.9em}
+.date{font-size:clamp(16px,1.45vw,28px);color:var(--muted);margin-top:.45em}
+.date b{color:var(--text);font-weight:500}
+
+/* weather & home */
+.out{grid-area:out} .home{grid-area:home}
+.big{font-size:clamp(40px,3.8vw,76px);font-weight:300;line-height:1;margin-top:auto}
+.wx-icon{font-size:clamp(26px,2.1vw,42px);position:absolute;right:var(--pad);top:calc(var(--pad) + 1.4em)}
+.row{display:flex;gap:.3em 1.1em;flex-wrap:wrap;margin-top:.45em}
+.kv{font-size:clamp(12px,.9vw,17px);color:var(--muted)}
+.kv b{color:var(--text);font-weight:500}
+.hum-bar{height:5px;border-radius:3px;background:var(--line);margin-top:.7em;overflow:hidden}
+.hum-bar i{display:block;height:100%;border-radius:3px;background:var(--cool)}
+.hint{font-size:clamp(11px,.8vw,15px);margin-top:.45em}
+
+/* steps */
+.steps{grid-area:steps;flex-direction:row;align-items:center;gap:clamp(10px,1.2vw,24px)}
+.ring{width:clamp(70px,6.2vw,124px);flex:none}
+.steps .mid{font-size:clamp(30px,2.6vw,52px)}
+.weekbars{display:flex;align-items:flex-end;gap:4px;height:clamp(24px,3.2vh,40px);margin-top:.6em}
+.weekbars i{flex:1;background:var(--line);border-radius:2px;min-height:3px}
+.weekbars i.hit{background:var(--up)} .weekbars i.today{outline:1px solid var(--muted)}
+
+/* money */
+.money{grid-area:money}
+.savings{font-size:clamp(44px,4.4vw,90px);font-weight:300;line-height:1;margin-top:.25em}
+.savings .cur{color:var(--muted);font-size:.5em;margin-left:.1em}
+.chg{font-size:clamp(15px,1.15vw,22px);margin-top:.4em}
+.chg .parts{color:var(--faint);font-size:.85em;margin-left:.4em}
+.totals{font-size:clamp(13px,.95vw,18px);color:var(--muted);margin-top:.3em}
+.totals b{color:var(--text);font-weight:500} .totals b.down{color:var(--down)}
+.money-body{display:grid;grid-template-columns:1fr 1.3fr;gap:clamp(14px,2vw,40px);margin-top:auto;align-items:end;min-height:0}
+.alloc{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:.6em}
+.alloc i{display:block;height:100%}
+.alloc-legend{display:flex;flex-wrap:wrap;gap:.25em 1em;font-size:clamp(11px,.85vw,16px);color:var(--muted);margin-bottom:.8em}
+.alloc-legend span::before{content:"";display:inline-block;width:.6em;height:.6em;border-radius:2px;margin-right:.35em;background:var(--c)}
+.alloc-legend b{color:var(--text);font-weight:500}
+.spark{width:100%;height:clamp(44px,6vh,90px);display:block}
+.spark-empty{color:var(--faint);font-size:clamp(11px,.8vw,14px);padding:.6em 0}
+.movers{display:flex;flex-direction:column;gap:.3em;margin-top:.6em;font-size:clamp(13px,.95vw,18px)}
+.movers div{display:flex;justify-content:space-between;gap:1em;white-space:nowrap}
+.movers span:first-child{overflow:hidden;text-overflow:ellipsis}
+.movers span:first-child{color:var(--muted)}
+.warn{font-size:clamp(10px,.7vw,13px);color:var(--faint);margin-top:.5em}
+.acc{display:flex;flex-direction:column;font-size:clamp(13px,1vw,19px)}
+.acc-row{display:flex;justify-content:space-between;align-items:baseline;gap:1em;padding:.3em 0;border-bottom:1px solid var(--line)}
+.acc-row:last-child{border-bottom:0}
+.acc .n{color:var(--muted);min-width:0}
+.acc .meta{display:block;font-size:.72em;color:var(--faint);margin-top:.05em}
+
+/* spend */
+.spend{grid-area:spend}
+.mid{font-size:clamp(34px,3.2vw,64px);font-weight:300;line-height:1;margin-top:auto}
+.mid small{font-size:.45em;color:var(--muted)}
+.budget{height:8px;border-radius:4px;background:var(--line);margin-top:.8em;position:relative}
+.budget i{display:block;height:100%;border-radius:4px;background:var(--up)}
+.budget .pace{position:absolute;top:-4px;width:2px;height:16px;background:var(--text);opacity:.6}
+
+.flow{display:grid;grid-template-columns:1fr 1fr;gap:1em;margin-top:auto}
+.flow-l{font-size:clamp(11px,.78vw,14px);color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.flow-v{font-size:clamp(24px,2vw,40px);font-weight:300;line-height:1.1;margin-top:.15em;white-space:nowrap}
+.flow-v small{font-size:.55em;color:var(--muted)}
+.flow-s{font-size:clamp(11px,.8vw,15px);color:var(--faint);margin-top:.2em;min-height:1.2em}
+.ratio{height:8px;border-radius:4px;background:color-mix(in srgb,var(--up) 55%,transparent);margin-top:1em;overflow:hidden}
+.ratio{display:flex}
+.ratio i{display:block;height:100%}
+#ratio-fx{background:var(--muted)}
+#ratio-sp{background:var(--text);opacity:.8}
+.fixed{font-size:clamp(12px,.85vw,16px);color:var(--muted);margin-top:.7em}
+.fixed b{color:var(--text);font-weight:500}
+.net{font-size:clamp(14px,1.05vw,20px);margin-top:.6em;color:var(--muted)}
+.net b{font-weight:500}
+
+/* payments */
+.pay{grid-area:pay}
+.pay h4{font-size:clamp(11px,.75vw,14px);color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin:.9em 0 .35em}
+.pay h4:first-of-type{margin-top:.8em}
+.pline{display:grid;grid-template-columns:auto 1fr auto;gap:.8em;align-items:baseline;font-size:clamp(13px,.95vw,18px);padding:.22em 0}
+.pline .d{color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.6em}
+.pline .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pline .t small{color:var(--faint);font-size:.8em;margin-left:.35em}
+.pline .a{font-variant-numeric:tabular-nums}
+.due{display:flex;justify-content:space-between;align-items:baseline;gap:1em;font-size:clamp(13px,1vw,19px);padding:.25em 0}
+.due .left{font-variant-numeric:tabular-nums;font-weight:500}
+.due .n{min-width:0}
+.due .n b{font-weight:500}
+.due .n small{display:block;color:var(--faint);font-size:.72em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.due .left{white-space:nowrap}
+
+/* calendar strip */
+.cal{grid-area:cal}
+.cal-head{display:flex;align-items:baseline;gap:1em}
+.next-in{font-size:clamp(13px,.95vw,18px);color:var(--accent)}
+.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.6vw,32px);margin-top:.7em;min-height:0;flex:1;overflow:hidden}
+.day{min-width:0;border-left:1px solid var(--line);padding-left:clamp(10px,1vw,18px);overflow:hidden}
+.day:first-child{border-left:0;padding-left:0}
+.day h5{font-size:clamp(11px,.78vw,14px);color:var(--faint);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:.4em}
+.day.today h5{color:var(--accent)}
+.ev{display:grid;grid-template-columns:auto 1fr;column-gap:.6em;margin-bottom:.4em;align-items:start}
+.ev .when{font-size:clamp(12px,.9vw,17px);color:var(--muted);font-variant-numeric:tabular-nums}
+.ev .t{font-size:clamp(13px,.98vw,19px);line-height:1.22;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ev.now .when,.ev.now .t{color:var(--accent)}
+.empty{color:var(--faint);margin-top:.6em;font-size:clamp(13px,.95vw,17px)}
+
+.demo{position:fixed;left:50%;bottom:4px;transform:translateX(-50%);font-size:11px;color:var(--faint);z-index:5}
+
+/* phone */
+@media (max-width: 900px), (orientation: portrait){
+  html,body{overflow:auto;height:auto}
+  body{padding:max(12px,env(safe-area-inset-top)) 12px 24px}
+  .grid{height:auto;grid-template-columns:1fr 1fr;grid-template-rows:none;
+    grid-template-areas:"clock clock" "cal cal" "money money" "pay pay" "spend spend" "steps steps" "out home"}
+  .tile{min-height:140px}
+  .time{font-size:64px}
+  .money-body{grid-template-columns:1fr;gap:16px;margin-top:18px}
+  .savings{font-size:46px}
+  .big{font-size:42px;margin-top:16px}
+  .mid{font-size:36px;margin-top:14px}
+  .days{grid-template-columns:1fr;gap:12px}
+  .day{border-left:0;padding-left:0}
+  .day:nth-child(n+4){display:none}
+  .demo{position:static;transform:none;text-align:center;margin-top:8px}
+}
+</style>
+</head>
+<body>
+<main class="grid">
+  <section class="tile clock">
+    <div class="time num" id="time">--:--</div>
+    <div class="date" id="date"></div>
+  </section>
+
+  <section class="tile out">
+    <div class="label">На улице</div>
+    <div class="wx-icon" id="wx-icon"></div>
+    <div class="stamp" id="wx-stamp"></div>
+    <div class="big num" id="wx-temp">—</div>
+    <div class="sub" id="wx-desc"></div>
+    <div class="row" id="wx-row"></div>
+  </section>
+
+  <section class="tile home">
+    <div class="label">Дома</div>
+    <div class="stamp" id="in-stamp"></div>
+    <div class="big num" id="in-temp">—</div>
+    <div class="row"><div class="kv">Влажность <b class="num" id="in-hum">—</b></div></div>
+    <div class="hum-bar"><i id="in-humbar" style="width:0"></i></div>
+    <div class="hint sub" id="in-hint"></div>
+  </section>
+
+  <section class="tile steps">
+    <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="12"/>
+      <circle id="ring" cx="60" cy="60" r="50" fill="none" stroke="var(--up)" stroke-width="12"
+        stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="314.16" transform="rotate(-90 60 60)"/>
+    </svg>
+    <div style="flex:1;min-width:0">
+      <div class="label">Шаги</div>
+      <div class="mid num" id="st-today" style="margin-top:.15em">—</div>
+      <div class="sub" id="st-sub"></div>
+      <div class="weekbars" id="st-week"></div>
+    </div>
+  </section>
+
+  <section class="tile money">
+    <div class="label">Капитал</div>
+    <div class="stamp" id="pf-stamp"></div>
+    <div class="savings num" id="savings">—</div>
+    <div class="chg num" id="pf-chg"></div>
+    <div class="totals" id="pf-totals"></div>
+    <div class="totals" id="pf-month"></div>
+    <div class="money-body">
+      <div>
+        <div class="alloc" id="alloc"></div>
+        <div class="alloc-legend" id="alloc-legend"></div>
+        <svg class="spark" id="spark" preserveAspectRatio="none"></svg>
+        <div class="spark-empty" id="spark-empty" hidden>График капитала начнёт рисоваться со второго дня работы</div>
+        <div class="movers" id="movers"></div>
+        <div class="warn" id="pf-warn"></div>
+      </div>
+      <div><div class="acc" id="accounts"></div></div>
+    </div>
+  </section>
+
+  <section class="tile spend">
+    <div class="label" id="sp-label">Месяц</div>
+    <div class="stamp" id="sp-today"></div>
+    <div class="flow">
+      <div><div class="flow-l">Доходы</div><div class="flow-v num up" id="inc-total">—</div><div class="flow-s" id="inc-sub"></div></div>
+      <div><div class="flow-l">Бытовые траты</div><div class="flow-v num" id="sp-total">—</div><div class="flow-s" id="sp-avg"></div></div>
+    </div>
+    <div class="fixed" id="fixed"></div>
+    <div class="ratio" id="ratio"><i id="ratio-fx"></i><i id="ratio-sp"></i></div>
+    <div class="net num" id="net"></div>
+    <div class="budget" id="sp-budget" hidden><i id="sp-bar"></i><span class="pace" id="sp-pace"></span></div>
+    <div class="sub" id="sp-sub" style="margin-top:.5em"></div>
+  </section>
+
+  <section class="tile pay">
+    <div class="label">Платежи</div>
+    <div class="stamp" id="pay-stamp"></div>
+    <h4 id="ob-h">Обязательные</h4>
+    <div id="dues"></div>
+    <h4 id="in-h">Придёт</h4>
+    <div id="incoming"></div>
+  </section>
+
+  <section class="tile cal">
+    <div class="cal-head"><div class="label">Календарь</div><div class="next-in" id="cal-next"></div></div>
+    <div class="stamp" id="cal-stamp"></div>
+    <div class="days" id="days"></div>
+  </section>
+</main>
+<div class="demo" id="demo" hidden>демо-данные</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const MONTHS = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const MON_S = ["янв","фев","мар","апр","мая","июн","июл","авг","сен","окт","ноя","дек"];
+const MONTHS_NOM = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const DAYS = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+const DAYS_S = ["вс","пн","вт","ср","чт","пт","сб"];
+const fmt = (v, d=0) => v==null||isNaN(v) ? "—" : Number(v).toLocaleString("ru-RU",{minimumFractionDigits:d,maximumFractionDigits:d});
+const sign = v => v>0 ? "+" : v<0 ? "−" : "";
+const cls = v => v>0 ? "up" : v<0 ? "down" : "";
+const rub = v => `${sign(v)}${fmt(Math.abs(v))} ₽`;
+const pad = n => String(n).padStart(2,"0");
+const esc = s => String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dshort = iso => { const d = new Date(iso + (iso.length===10 ? "T12:00:00" : "")); return `${d.getDate()} ${MON_S[d.getMonth()]}`; };
+const plural = (n, a, b, c) => { n = Math.abs(n) % 100; const m = n % 10;
+  return n>10&&n<20 ? c : m===1 ? a : m>=2&&m<=4 ? b : c; };
+
+let skew = 0;
+const serverNow = () => new Date(Date.now() + skew);
+
+const WX = {0:["Ясно","☀️"],1:["Почти ясно","🌤"],2:["Переменная облачность","⛅️"],3:["Пасмурно","☁️"],
+  45:["Туман","🌫"],48:["Изморозь","🌫"],51:["Морось","🌦"],53:["Морось","🌦"],55:["Сильная морось","🌧"],
+  56:["Ледяная морось","🌧"],57:["Ледяная морось","🌧"],61:["Небольшой дождь","🌦"],63:["Дождь","🌧"],65:["Ливень","🌧"],
+  66:["Ледяной дождь","🌧"],67:["Ледяной дождь","🌧"],71:["Небольшой снег","🌨"],73:["Снег","🌨"],75:["Сильный снег","❄️"],
+  77:["Снежная крупа","🌨"],80:["Ливни","🌦"],81:["Ливни","🌧"],82:["Сильные ливни","⛈"],85:["Снегопад","🌨"],86:["Сильный снегопад","❄️"],
+  95:["Гроза","⛈"],96:["Гроза с градом","⛈"],99:["Гроза с градом","⛈"]};
+
+function ago(iso){
+  if(!iso) return "";
+  const m = Math.round((serverNow() - new Date(iso))/60000);
+  if(m < 2) return "только что";
+  if(m < 60) return m + " мин назад";
+  if(m < 1440) return Math.round(m/60) + " ч назад";
+  return Math.round(m/1440) + " дн назад";
+}
+function stamp(el, iso, err, staleMin){
+  const old = iso && (serverNow()-new Date(iso))/60000 > staleMin;
+  el.textContent = err && !iso ? "нет данных" : ago(iso);
+  el.className = "stamp" + ((err || old) ? " bad" : "");
+  el.title = err || "";
+}
+
+/* ── часы ── */
+function tick(){
+  const n = serverNow();
+  $("time").innerHTML = `${pad(n.getHours())}:${pad(n.getMinutes())}<span class="sec">${pad(n.getSeconds())}</span>`;
+  $("date").innerHTML = `<b>${n.getDate()} ${MONTHS[n.getMonth()]}</b>, ${DAYS[n.getDay()]}`;
+  const h = n.getHours();
+  document.body.classList.toggle("night", h >= 23 || h < 7);
+}
+setInterval(tick, 1000); tick();
+setInterval(() => { const n=Math.floor(Date.now()/600000)%4;
+  document.body.style.transform = `translate(${[0,2,2,0][n]}px,${[0,0,2,2][n]}px)`; }, 60000);
+
+/* ── погода и дом ── */
+function renderWeather(w, err){
+  stamp($("wx-stamp"), w&&w.updated, err, 60);
+  if(!w) return;
+  const [desc, icon] = WX[w.code] || ["", ""];
+  $("wx-icon").textContent = icon;
+  $("wx-temp").innerHTML = `${String(Math.round(w.temp)).replace("-","−")}<span class="deg">°</span>`;
+  $("wx-desc").textContent = `${w.name} · ${desc.toLowerCase()}, ощущается ${Math.round(w.feels)}°`;
+  const t = w.tomorrow || {};
+  $("wx-row").innerHTML =
+    `<div class="kv">Днём <b class="num">${Math.round(w.tmin)}…${Math.round(w.tmax)}°</b></div>` +
+    `<div class="kv">Осадки <b class="num">${w.precip ?? "—"}%</b></div>` +
+    `<div class="kv">Ветер <b class="num">${fmt(w.wind,0)} м/с</b></div>` +
+    (t.tmax!=null ? `<div class="kv">Завтра <b class="num">${Math.round(t.tmin)}…${Math.round(t.tmax)}°</b> ${(WX[t.code]||["",""])[1]}</div>` : "");
+}
+
+function renderIndoor(d, err){
+  stamp($("in-stamp"), d&&d.updated, err, 30);
+  if(!d){ $("in-hint").textContent = "ждём датчик"; return; }
+  $("in-temp").innerHTML = `${fmt(d.temp,1)}<span class="deg">°</span>`;
+  $("in-hum").textContent = d.humidity + "%";
+  $("in-humbar").style.width = Math.min(100, d.humidity) + "%";
+  const h = d.humidity, t = d.temp;
+  let hint = h < 30 ? "Сухо — включите увлажнитель" : h > 60 ? "Влажно — проветрите" : "Влажность в норме";
+  if (t < 19) hint = "Прохладно · " + hint.toLowerCase();
+  else if (t > 26) hint = "Жарко · " + hint.toLowerCase();
+  $("in-hint").textContent = hint + (d.battery!=null && d.battery < 15 ? " · батарейка датчика " + d.battery + "%" : "");
+}
+
+/* ── шаги ── */
+function renderSteps(s){
+  $("st-today").textContent = fmt(s.today);
+  $("ring").style.strokeDashoffset = (314.16 * (1 - Math.min(1, s.today / (s.goal||10000)))).toFixed(1);
+  $("st-sub").textContent = `цель ${fmt(s.goal)}` + (s.updated ? ` · ${ago(s.updated)}` : "");
+  const mx = Math.max(s.goal, ...s.week.map(w=>w.v), 1);
+  $("st-week").innerHTML = s.week.map((w,i) =>
+    `<i class="${w.v>=s.goal?"hit":""} ${i===s.week.length-1?"today":""}" style="height:${Math.max(4,w.v/mx*100)}%" title="${w.d}: ${w.v}"></i>`).join("");
+}
+
+/* ── капитал ── */
+function spark(svg, pts){
+  if(!pts || pts.length < 2){ svg.innerHTML = ""; return; }
+  const W = 300, H = 80, vs = pts.map(p=>p.v), mn = Math.min(...vs), mx = Math.max(...vs), r = (mx-mn)||1;
+  const d = vs.map((v,i)=>(i?"L":"M")+(i/(vs.length-1)*W).toFixed(1)+" "+(H-4-(v-mn)/r*(H-8)).toFixed(1)).join(" ");
+  const col = vs[vs.length-1] >= vs[0] ? "var(--up)" : "var(--down)";
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = `<defs><linearGradient id="sg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".25"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${d} L${W} ${H} L0 ${H}Z" fill="url(#sg)"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+}
+
+const COLORS = {"Акции":"#f2b84b","Облигации":"#6cb4ff","Фонды":"#4fd18b","Деньги":"#8a93a0","Валюта":"#5fd0c8","Вклады":"#c58cff","Займ":"#ff9a5c"};
+function dueClass(days){ return days <= 3 ? "down" : days <= 7 ? "warnc" : ""; }
+function dueText(days){ return days === 0 ? "сегодня" : days === 1 ? "завтра" : `через ${days} ${plural(days,"день","дня","дней")}`; }
+
+function renderPortfolio(p, err){
+  stamp($("pf-stamp"), p&&p.updated, err, 30);
+  if(!p) return;
+  $("savings").innerHTML = `${fmt(p.savings)}<span class="cur">₽</span>`;
+  const day = p.day_total ?? p.change;
+  $("pf-chg").innerHTML = `<span class="${cls(day)}">${rub(day)}</span> <span class="faint">за сегодня</span>` +
+    (p.accrual_today ? `<span class="parts">биржа ${rub(p.change)} · проценты ${rub(p.accrual_today)}</span>` : "");
+  $("pf-totals").innerHTML = p.debt_total ? `активы <b class="num">${fmt(p.assets)} ₽</b> · долги <b class="num down">−${fmt(p.debt_total)} ₽</b>` : "";
+
+  const items = [
+    ...p.accounts.map(a=>({name:a.name,value:a.value})),
+    ...(p.deposits||[]).filter(d=>d.value>0).map(d=>({name:d.name,value:d.value,
+        meta: `${d.rate}%` + (d.per_day ? ` · +${fmt(d.per_day)} ₽ в день` : "")
+              + (d.to ? (d.overdue ? ` · срок прошёл ${dshort(d.to)}` : ` · до ${dshort(d.to)}: ${fmt(d.at_end)} ₽`) : "")})),
+    ...(p.cash_fx||[]).map(c=>({name:c.name,value:c.value,
+        meta: `${fmt(c.amount)} ${c.currency}` + (c.rate ? ` · курс ${fmt(c.rate,2)}` : " · нет курса")})),
+    ...(p.debts||[]).map(d=>({name:d.name,value:d.value,debt:true}))];
+  $("accounts").innerHTML = items.map(i =>
+    `<div class="acc-row"><span class="n">${esc(i.name)}${i.meta?`<span class="meta">${i.meta}</span>`:""}</span><span class="num ${i.debt?"down":""}">${i.debt?"−":""}${fmt(i.value)} ₽</span></div>`).join("");
+
+  const al = (p.alloc||[]), at = al.reduce((a,b)=>a+b.value,0) || 1;
+  $("alloc").innerHTML = al.map(a=>`<i style="flex:${a.value};background:${COLORS[a.name]}"></i>`).join("");
+  $("alloc-legend").innerHTML = al.filter(a=>a.value/at>=.005).map(a=>`<span style="--c:${COLORS[a.name]}">${a.name} <b class="num">${fmt(a.value/at*100)}%</b></span>`).join("");
+
+  const hist = p.history || [];
+  spark($("spark"), hist);
+  $("spark").style.display = hist.length > 1 ? "" : "none";
+  $("spark-empty").hidden = hist.length > 1;
+  $("movers").innerHTML = (p.movers||[]).map(m =>
+    `<div><span>${esc(m.name)}</span><span class="num ${cls(m.change)}">${rub(m.change)}</span></div>`).join("")
+    + (hist.length > 7 ? `<div><span>с ${dshort(hist[0].d)}</span><span class="num ${cls(p.savings-hist[0].v)}">${rub(p.savings-hist[0].v)}</span></div>` : "");
+  const mo = p.month;
+  $("pf-month").innerHTML = mo && (mo.market || mo.accrual || mo.manual)
+    ? `с ${dshort(mo.since)}: <b class="num ${cls(mo.change)}">${rub(mo.change)}</b> = биржа ${rub(mo.market)} · проценты ${rub(mo.accrual)} · пополнения и долги ${rub(mo.manual)}`
+    : "";
+  $("pf-warn").textContent = (lastErrors.config ? lastErrors.config + ". " : "") + (p.stale && p.stale.length ? `Без котировки (взята сумма из настроек): ${p.stale.join(", ")}` : "");
+
+  lastDebts = (p.debts||[]);
+  renderObligations();
+}
+
+let lastDebts = [], lastBills = [];
+function renderObligations(){
+  const rows = [
+    ...lastDebts.filter(d=>d.due_date).map(d=>({name:d.name, date:d.due_date, days:d.due_days, amount:d.due_amount,
+        sub: `долг ${fmt(d.value)} ₽` + ((d.later||[]).length ? " · далее " + d.later.map(x=>`${fmt(x.amount)} до ${dshort(x.date)}`).join(", ") : "")})),
+    ...lastBills.map(b=>({name:b.name, date:b.due_date, days:b.due_days, amount:b.amount, sub:"каждый месяц"}))
+  ].sort((a,b)=>a.days-b.days);
+  const in30 = rows.filter(r=>r.days<=30).reduce((a,r)=>a+(r.amount||0),0);
+  $("ob-h").innerHTML = `Обязательные${in30 ? ` · за 30 дней <span class="down">−${fmt(in30)} ₽</span>` : ""}`;
+  $("dues").innerHTML = rows.length ? rows.map(r =>
+    `<div class="due"><span class="n">${esc(r.name)} <b class="num">${fmt(r.amount)} ₽</b><small>до ${dshort(r.date)} · ${r.sub}</small></span><span class="left ${dueClass(r.days)}">${dueText(r.days)}</span></div>`).join("")
+    : `<div class="empty">Нет платежей</div>`;
+}
+
+/* ── купоны и дивиденды ── */
+function renderPayments(pm, err, extra){
+  stamp($("pay-stamp"), pm&&pm.updated, err, 24*60);
+  const n = serverNow(), lim = new Date(n.getTime() + 30*864e5).toISOString().slice(0,10);
+  const items = [...((pm&&pm.items)||[]), ...(extra||[])].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  if(!items.length){ $("incoming").innerHTML = `<div class="empty">${!pm && !err ? "загрузка…" : "Ближайших поступлений нет"}</div>`; return; }
+  const in30 = items.filter(i=>!i.transfer && i.date<=lim).reduce((a,i)=>a+(i.amount||0),0);
+  $("in-h").innerHTML = `Придёт${in30 ? ` · за 30 дней <span class="up">+${fmt(in30)} ₽</span>` : ""}`;
+  $("incoming").innerHTML = items.slice(0,7).map(i =>
+    `<div class="pline"><span class="d">${dshort(i.date)}</span><span class="t">${esc(i.name)}<small>${i.kind}${i.kind==="дивиденд"?", отсечка":""}</small></span><span class="a ${i.transfer?"faint":"up"}">${i.amount!=null ? "+"+fmt(i.amount)+" ₽" : "—"}</span></div>`).join("");
+}
+
+/* ── траты ── */
+function renderSpend(s, inc, bills){
+  const n = serverNow();
+  inc = inc || {month_total:0, count:0, last:[]};
+  $("sp-label").textContent = MONTHS_NOM[n.getMonth()];
+  $("sp-total").innerHTML = fmt(s.month_total) + "<small> ₽</small>";
+  $("inc-total").innerHTML = fmt(inc.month_total) + "<small> ₽</small>";
+  $("sp-today").textContent = s.today_total ? `траты сегодня ${fmt(s.today_total)} ₽` : "";
+  $("sp-avg").textContent = s.count ? `~${fmt(s.month_total/(s.day||1))} ₽/день` : "";
+  const li = (inc.last||[])[0];
+  $("inc-sub").textContent = li ? `${li.note ? li.note+", " : ""}${dshort(li.ts.slice(0,10))}` : "пока нет";
+  const fixed = (bills||[]).filter(b=>b.is_spending);
+  const fixedSum = fixed.reduce((a,b)=>a+b.amount,0);      // аренда и т.п. — фикс за весь месяц
+  const dim = s.days_in_month, day = Math.max(1, s.day);
+  const perDay = s.month_total / day;                        // текущий темп бытовых трат
+  const forecast = perDay * dim;                             // бытовые к концу месяца при таком темпе
+  const netF = inc.month_total - forecast - fixedSum;
+  $("ratio").style.display = inc.month_total ? "" : "none";
+  $("ratio-fx").style.width = inc.month_total ? Math.min(100, fixedSum/inc.month_total*100) + "%" : "0";
+  $("ratio-sp").style.width = inc.month_total ? Math.min(100, forecast/inc.month_total*100) + "%" : "0";
+  $("fixed").innerHTML = fixed.map(b=>`${esc(b.name)} <b class="num">${fmt(b.amount)} ₽</b> <span class="faint">${b.paid_this_month ? "оплачено" : "до "+dshort(b.due_date)}</span>`).join(" · ");
+  $("net").innerHTML = inc.month_total
+    ? `К концу месяца останется <b class="num ${cls(netF)}" style="white-space:nowrap">≈ ${rub(netF)}</b>` + (netF > 0 ? ` · ${fmt(netF/inc.month_total*100)}% дохода` : "")
+    : "";
+  const homeBudget = s.budget > 0 ? s.budget - fixedSum : 0;   // общий бюджет включает аренду
+  if (homeBudget > 0){
+    $("sp-budget").hidden = false;
+    const share = s.month_total / homeBudget, pace = day / dim;
+    $("sp-bar").style.width = Math.min(100, share*100) + "%";
+    $("sp-bar").style.background = share > 1 ? "var(--down)" : share > pace ? "var(--accent)" : "var(--up)";
+    $("sp-pace").style.left = (pace*100) + "%";
+    const diff = homeBudget - forecast, left = homeBudget - s.month_total, daysLeft = dim - day + 1;
+    $("sp-sub").innerHTML = `Лимит бытовых ${fmt(homeBudget)} ₽ · прогноз ${fmt(forecast)} ₽ · `
+      + (diff >= 0 ? `<span class="up">запас ${fmt(diff)} ₽</span>`
+                   : `<span class="down">перерасход ${fmt(-diff)} ₽</span>`
+                     + (left > 0 ? ` · уложиться: до ${fmt(left/daysLeft)} ₽/день` : ""));
+  } else { $("sp-budget").hidden = true; $("sp-sub").textContent = ""; }
+}
+
+/* ── календарь полосой ── */
+const dayKey = d => d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();
+function dayTitle(d){
+  const n = serverNow(), t = new Date(n); t.setDate(n.getDate()+1);
+  if (dayKey(d) === dayKey(n)) return "Сегодня";
+  if (dayKey(d) === dayKey(t)) return "Завтра";
+  return `${DAYS_S[d.getDay()]}, ${d.getDate()} ${MON_S[d.getMonth()]}`;
+}
+function renderCalendar(c, err){
+  stamp($("cal-stamp"), c&&c.updated, err, 60);
+  if(!c){ $("days").innerHTML = `<div class="empty">${esc(err || "загрузка…")}</div>`; return; }
+  const n = serverNow();
+  const evs = c.events.filter(e => new Date(e.end) > n);
+  const cur = evs.find(e => !e.allday && new Date(e.start) <= n);
+  const nxt = evs.find(e => !e.allday && new Date(e.start) > n);
+  if (cur) $("cal-next").textContent = `Сейчас: ${cur.title}`;
+  else if (nxt){
+    const m = Math.round((new Date(nxt.start) - n)/60000);
+    $("cal-next").textContent = m < 60 ? `${nxt.title} через ${m} мин`
+      : m < 12*60 ? `${nxt.title} через ${Math.floor(m/60)} ч ${m%60 ? (m%60)+" мин" : ""}` : "";
+  } else $("cal-next").textContent = "";
+  if(!evs.length){ $("days").innerHTML = `<div class="empty">Ничего не запланировано</div>`; return; }
+  const groups = [];
+  for (const e of evs){
+    const shown = new Date(Math.max(new Date(e.start), n)), k = dayKey(shown);
+    let g = groups.find(g => g.k === k);
+    if (!g){ if (groups.length >= 5) continue; g = {k, d: shown, evs: []}; groups.push(g); }
+    g.evs.push(e);
+  }
+  $("days").innerHTML = groups.map(g => `<div class="day ${dayTitle(g.d)==="Сегодня"?"today":""}"><h5>${dayTitle(g.d)}</h5>` +
+    g.evs.slice(0,4).map(e => { const s = new Date(e.start), active = !e.allday && s <= n;
+      return `<div class="ev ${active?"now":""}"><div class="when">${e.allday ? "весь день" : pad(s.getHours())+":"+pad(s.getMinutes())}</div><div class="t">${esc(e.title)}</div></div>`; }).join("")
+    + (g.evs.length > 4 ? `<div class="faint" style="font-size:.85em">ещё ${g.evs.length-4}</div>` : "") + `</div>`).join("");
+}
+
+let lastState = null, lastErrors = {};
+async function refresh(){
+  try{
+    const s = await (await fetch("/api/state", {cache:"no-store"})).json();
+    skew = new Date(s.server_time) - Date.now();
+    if (Math.abs(skew) < 3000) skew = 0;
+    lastState = s;
+    const e = s.errors || {};
+    lastErrors = e;
+    renderWeather(s.weather, e.weather);
+    renderIndoor(s.indoor, e.indoor);
+    renderPortfolio(s.portfolio, e.portfolio);
+    renderPayments(s.payments, e.payments, s.incoming);
+    renderSpend(s.spend, s.income, s.bills);
+    lastBills = s.bills || []; renderObligations();
+    renderSteps(s.steps);
+    renderCalendar(s.calendar, e.calendar);
+    $("demo").hidden = !s.mock;
+  }catch(err){ console.warn(err); }
+}
+refresh();
+setInterval(refresh, 30000);
+setInterval(() => lastState && renderCalendar(lastState.calendar, (lastState.errors||{}).calendar), 60000);
+setInterval(() => { const n=new Date(); if(n.getHours()===4 && n.getMinutes()===0) location.reload(); }, 60000);
+</script>
+</body>
+</html>

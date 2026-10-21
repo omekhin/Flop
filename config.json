@@ -1,0 +1,291 @@
+{
+  "port": 8765,
+  "timezone": "Europe/Moscow",
+  "token": "1234Ilya",
+  "weather": {
+    "name": "Москва",
+    "lat": 55.7558,
+    "lon": 37.6173
+  },
+  "calendars": [
+    "webcal://p111-caldav.icloud.com/published/2/MzE4MDExODUwMzE4MDExOAV1pYyG0krEccsmFTeNjWblkibfnklHSvNpMTgEsveJscNuEIImpbOLR8PTdkOnOSH2orRu6T-Cwij6bJ-jpR8"
+  ],
+  "calendar_days_ahead": 14,
+  "indoor_sensor": {
+    "enabled": false,
+    "name_prefix": "ATC_"
+  },
+  "spend_budget_month": 110000,
+  "steps_goal": 10000,
+  "deposits": [
+    {
+      "name": "Вклад Яндекс",
+      "amount": 587439,
+      "rate": 13,
+      "accrual": "daily",
+      "from": "2026-10-20",
+      "note": "остаток на 20.10; 13% с 18.10 до конца октября — в ноябре обновить ставку"
+    },
+    {
+      "name": "Вклад Альфа",
+      "amount": 600000,
+      "rate": 14,
+      "accrual": "daily",
+      "from": "2026-09-30",
+      "to": "2027-01-31",
+      "note": "проценты начисляются каждый день"
+    },
+    {
+      "name": "Даня должен",
+      "amount": 500000,
+      "rate": 20,
+      "accrual": "daily",
+      "from": "2026-05-01",
+      "to": "2026-12-31",
+      "kind": "loan"
+    }
+  ],
+  "debts": [
+    {
+      "name": "Кредитка Сбер",
+      "amount": 533475,
+      "schedule": [
+        {
+          "date": "2026-10-31",
+          "amount": 209276
+        },
+        {
+          "date": "2026-11-30",
+          "amount": 110541
+        },
+        {
+          "date": "2026-12-31",
+          "amount": 107037
+        }
+      ]
+    },
+    {
+      "name": "Т-Банк",
+      "amount": 100000,
+      "due": 16
+    }
+  ],
+  "bills": [
+    {
+      "name": "Квартира",
+      "amount": 35000,
+      "day": 10
+    }
+  ],
+  "incoming": [
+    {
+      "name": "Зарплата",
+      "amount": 130500,
+      "days": [
+        3,
+        18
+      ],
+      "workday": "before"
+    },
+    {
+      "name": "Т-Банк → вклад",
+      "amount": 100000,
+      "start": "2026-10-23",
+      "every_days": 30,
+      "transfer": true
+    }
+  ],
+  "cash_fx": [
+    {
+      "name": "Доллары наличными",
+      "amount": 700,
+      "currency": "USD"
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Брокерский счёт",
+      "cash": 564.41,
+      "positions": [
+        {
+          "name": "Сбербанк",
+          "kind": "share",
+          "secid": "SBER",
+          "qty": 145,
+          "ref_value": 40789.95
+        },
+        {
+          "name": "Циан",
+          "kind": "share",
+          "secid": "CNRU",
+          "qty": 34,
+          "ref_value": 22494.4
+        },
+        {
+          "name": "Яндекс",
+          "kind": "share",
+          "secid": "YDEX",
+          "qty": 5,
+          "ref_value": 17865
+        },
+        {
+          "name": "Озон",
+          "kind": "share",
+          "secid": "OZON",
+          "qty": 5,
+          "ref_value": 16012.5
+        },
+        {
+          "name": "Т-Технологии",
+          "kind": "share",
+          "secid": "T",
+          "qty": 56,
+          "ref_value": 14941.92
+        },
+        {
+          "name": "Хэдхантер",
+          "kind": "share",
+          "secid": "HEAD",
+          "qty": 5,
+          "ref_value": 13760
+        },
+        {
+          "name": "Татнефть ап",
+          "kind": "share",
+          "secid": "TATNP",
+          "qty": 20,
+          "ref_value": 12222
+        },
+        {
+          "name": "ИКС 5",
+          "kind": "share",
+          "secid": "X5",
+          "qty": 6,
+          "ref_value": 11958
+        },
+        {
+          "name": "Лукойл",
+          "kind": "share",
+          "secid": "LKOH",
+          "qty": 2,
+          "ref_value": 11253
+        },
+        {
+          "name": "Полюс",
+          "kind": "share",
+          "secid": "PLZL",
+          "qty": 6,
+          "ref_value": 5926.8
+        },
+        {
+          "name": "B2B-РТС",
+          "kind": "share",
+          "secid": "BTBR",
+          "qty": 31,
+          "ref_value": 3834.39,
+          "query": "RU000A104U43"
+        },
+        {
+          "name": "Северсталь",
+          "kind": "share",
+          "secid": "CHMF",
+          "qty": 4,
+          "ref_value": 2689.6
+        },
+        {
+          "name": "ФСК-Россети",
+          "kind": "share",
+          "secid": "FEES",
+          "qty": 104,
+          "ref_value": 5.4
+        },
+        {
+          "name": "ОФЗ 26238",
+          "kind": "bond",
+          "secid": "SU26238RMFS4",
+          "qty": 169,
+          "ref_value": 89324.95,
+          "query": "26238"
+        },
+        {
+          "name": "Атомэнергопром 001P",
+          "kind": "bond",
+          "secid": "RU000A10DPS2",
+          "qty": 27,
+          "ref_value": 27264.06,
+          "query": "Атомэнергопром"
+        },
+        {
+          "name": "Селигдар 001P-10",
+          "kind": "bond",
+          "secid": "RU000A10EC22",
+          "qty": 17,
+          "ref_value": 17157.76,
+          "query": "Селигдар"
+        },
+        {
+          "name": "Сбербанк 001P-SBER51",
+          "kind": "bond",
+          "secid": "",
+          "qty": 15,
+          "ref_value": 15292.2,
+          "query": "SBER51"
+        },
+        {
+          "name": "Синара-ТМ",
+          "kind": "bond",
+          "secid": "RU000A1082Y8",
+          "qty": 15,
+          "ref_value": 15157.8,
+          "query": "Синара"
+        },
+        {
+          "name": "Балтийский лизинг БО",
+          "kind": "bond",
+          "secid": "RU000A10BJX9",
+          "qty": 21,
+          "ref_value": 12379.29,
+          "query": "Балтийский лизинг"
+        },
+        {
+          "name": "Казахстан 07",
+          "kind": "bond",
+          "secid": "RU000A101RV2",
+          "qty": 11,
+          "ref_value": 10328.45,
+          "query": "Казахстан"
+        },
+        {
+          "name": "Фаворит БО-П01",
+          "kind": "bond",
+          "secid": "",
+          "qty": 3,
+          "ref_value": 735,
+          "query": "Фаворит"
+        },
+        {
+          "name": "Денежный рынок Альфа-Капитал",
+          "kind": "fund",
+          "secid": "AKMM",
+          "qty": 1475,
+          "ref_value": 264334.75
+        }
+      ]
+    },
+    {
+      "name": "ИИС",
+      "cash": 27740.0,
+      "positions": [
+        {
+          "name": "ОФЗ 26252",
+          "kind": "bond",
+          "secid": "",
+          "qty": 435,
+          "ref_value": 371429,
+          "query": "26252"
+        }
+      ],
+      "note": "купон ОФЗ 26252 21.10 (435 × 62,33) добавлен деньгами; после покупки ОФЗ обновить qty и cash"
+    }
+  ]
+}

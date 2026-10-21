@@ -1,0 +1,3 @@
+certifi
+icalendar>=5
+recurring_ical_events>=2

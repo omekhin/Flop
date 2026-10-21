@@ -1,0 +1,97 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//home-dashboard//papiny-dochki//RU
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Папины дочки. Новые — 6 сезон
+X-WR-TIMEZONE:Europe/Moscow
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e01@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261019
+DTEND;VALUE=DATE:20261020
+SUMMARY:Папины дочки. Новые — серии 1–2
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e03@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261020
+DTEND;VALUE=DATE:20261021
+SUMMARY:Папины дочки. Новые — серии 3–4
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e05@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261021
+DTEND;VALUE=DATE:20261022
+SUMMARY:Папины дочки. Новые — серии 5–6
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e07@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261022
+DTEND;VALUE=DATE:20261023
+SUMMARY:Папины дочки. Новые — серии 7–8
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e09@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261026
+DTEND;VALUE=DATE:20261027
+SUMMARY:Папины дочки. Новые — серии 9–10
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e11@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261027
+DTEND;VALUE=DATE:20261028
+SUMMARY:Папины дочки. Новые — серии 11–12
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e13@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261028
+DTEND;VALUE=DATE:20261029
+SUMMARY:Папины дочки. Новые — серии 13–14
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e15@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261029
+DTEND;VALUE=DATE:20261030
+SUMMARY:Папины дочки. Новые — серии 15–16
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e17@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261102
+DTEND;VALUE=DATE:20261103
+SUMMARY:Папины дочки. Новые — серии 17–18
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:papiny-dochki-s6-e19@home-dashboard
+DTSTAMP:20261020T191126Z
+DTSTART;VALUE=DATE:20261103
+DTEND;VALUE=DATE:20261104
+SUMMARY:Папины дочки. Новые — серии 19–20 (финал сезона)
+DESCRIPTION:6 сезон\, 20 серий. СТС и онлайн-кинотеатр START. График по данным sports.ru — время эфира уточняйте в программе СТС.
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
