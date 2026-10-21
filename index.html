@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Флоп — покерный тренажёр с тренером</title>
+<meta name="description" content="Бесплатный тренажёр техасского холдема: стол на 9 игроков с ботами, тренер, который объясняет ошибки, и тренажёр аутов. Без регистрации и без ставок на деньги.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Флоп">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Флоп — покерный тренажёр с тренером">
+<meta property="og:description" content="Бесплатный тренажёр техасского холдема: стол на 9 игроков с ботами, тренер, который объясняет ошибки, и тренажёр аутов. Без регистрации и без ставок на деньги.">
+<meta property="og:url" content="https://poker-trener.ru/">
+<meta property="og:image" content="https://poker-trener.ru/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f6a4c">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Флоп">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --ink:#141a17; --ink2:#47524d; --muted:#6f7a75; --line:#d9dfdb;
+  --felt:#1f6a4c; --felt-edge:#174f39; --felt-ink:#e9f4ee; --rail:#3a2f27;
+  --accent:#1f6a4c; --accent-ink:#ffffff; --accent-soft:#dcebe3;
+  --bad:#cc3f37; --ok:#b07400; --good:#1d7a4a;
+  --card:#ffffff; --c-s:#1a1a1a; --c-h:#cf2f2f;
+  --display:"Unbounded","Onest",system-ui,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --accent-soft:#1d3329;
+  --bad:#ec6b63; --ok:#e0a63a; --good:#4cbb7f;
+  --card:#f4f4f1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --accent-soft:#1d3329;
+  --bad:#ec6b63; --ok:#e0a63a; --good:#4cbb7f;
+  --card:#f4f4f1; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:18px}
+.brand{font-family:var(--display);font-weight:700;font-size:20px;text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand svg{width:28px;height:28px}
+.top nav{display:flex;gap:18px;font-size:15px}
+.top nav a{text-decoration:none;color:var(--ink2)}
+.top nav a:hover{color:var(--ink);text-decoration:underline}
+
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center;padding-block:40px 64px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.6vw,52px);line-height:1.08;letter-spacing:-.02em;margin:0 0 20px}
+h1 em{font-style:normal;color:var(--accent)}
+.lead{font-size:clamp(17px,1.6vw,19px);color:var(--ink2);max-width:34em;margin:0 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:12px;font-weight:600;font-size:16px;text-decoration:none;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:hover{filter:brightness(1.05)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.fine{font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 16px}
+.fine span::before{content:"✓ ";color:var(--accent);font-weight:700}
+
+/* demo table */
+.demo{position:relative}
+.felt{aspect-ratio:16/11;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,color-mix(in srgb,var(--felt) 88%,white) 0%,var(--felt) 60%,var(--felt-edge) 100%);border:12px solid var(--rail);box-shadow:0 18px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--felt-ink)}
+.cards{display:flex;gap:6px}
+.c{width:44px;height:62px;border-radius:7px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:17px;line-height:1;box-shadow:0 2px 6px rgba(0,0,0,.25);color:var(--c-s)}
+.c.r{color:var(--c-h)}
+.c small{font-size:17px}
+.potl{font-family:var(--mono);font-size:14px;background:rgba(0,0,0,.25);padding:3px 12px;border-radius:999px}
+.hand{display:flex;gap:6px;margin-top:6px}
+.hand .c{width:50px;height:70px;font-size:19px}
+.bubble{position:relative;margin:-22px 0 0 auto;width:min(330px,100%);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px;box-shadow:0 10px 26px rgba(0,0,0,.14)}
+.bubble b{display:inline-block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--good);margin-bottom:4px}
+.bubble .n{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+
+section{padding-block:56px}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(24px,3vw,34px);letter-spacing:-.015em;margin:0 0 12px;line-height:1.15}
+.sub{color:var(--ink2);margin:0 0 32px;max-width:40em}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.f{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:10px}
+.f h3{font-size:19px;margin:0;font-weight:700}
+.f p{margin:0;color:var(--ink2)}
+.f a{margin-top:auto;font-weight:600;color:var(--accent);text-decoration:none}
+.f a:hover{text-decoration:underline}
+.ico{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
+.ico svg{width:24px;height:24px}
+
+.mistakes{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.mlist{display:flex;flex-direction:column;gap:10px}
+.m{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.m .k{font-family:var(--mono);font-weight:700;color:var(--bad);grid-row:span 2;font-size:15px;padding-top:2px}
+.m b{font-weight:600}
+.m span{color:var(--ink2);font-size:14px}
+
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;list-style:none;padding:0;margin:0}
+.steps li{counter-increment:s;padding:24px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-family:var(--display);margin-bottom:12px}
+.steps b{display:block;margin-bottom:4px;font-size:17px}
+.steps span{color:var(--ink2);display:block}
+.steps li{display:flex;flex-direction:column}
+.steps .go{margin-top:auto;padding-top:14px;font-weight:600;color:var(--accent);text-decoration:none}
+.steps .go:hover{text-decoration:underline}
+
+.faq{max-width:760px}
+details{border-bottom:1px solid var(--line);padding:16px 0}
+summary{cursor:pointer;font-weight:600;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
+details[open] summary::after{content:"–"}
+summary::-webkit-details-marker{display:none}
+details p{margin:10px 0 0;color:var(--ink2)}
+
+.final{text-align:center;background:var(--felt);color:var(--felt-ink);border-radius:24px;padding:56px 24px;margin-block:24px 56px}
+.final h2{color:#fff}
+.final p{opacity:.85;margin:0 0 24px}
+.final .btn.primary{background:#fff;color:#123c2c;border-color:#fff}
+.final .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+
+footer{border-top:1px solid var(--line);padding-block:28px 40px;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+footer a{color:var(--ink2)}
+
+@media (max-width:880px){
+  .hero{grid-template-columns:1fr;gap:40px;padding-top:16px}
+  .grid3,.steps{grid-template-columns:1fr}
+  .mistakes{grid-template-columns:1fr;gap:24px}
+  .bubble{width:auto;margin:-18px 8px 0}
+  .top nav{display:none}
+  section{padding-block:40px}
+}
+@media (max-width:420px){ .c{width:36px;height:52px;font-size:15px} .hand .c{width:42px;height:60px} }
+@media (max-width:560px){ .cta .btn{flex:1 1 0;padding:0 12px} .cta .btn.primary{flex:1 1 100%} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="./"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="2" width="26" height="28" rx="5" fill="var(--accent)"/><path d="M16 7c-3 4-8 6.5-8 10.3 0 2.3 1.8 3.9 3.9 3.9 1.3 0 2.4-.6 3.1-1.5-.3 2-1 3.6-2.3 4.8h6.6c-1.3-1.2-2-2.8-2.3-4.8.7.9 1.8 1.5 3.1 1.5 2.1 0 3.9-1.6 3.9-3.9C24 13.5 19 11 16 7z" fill="var(--accent-ink)"/></svg>Флоп</a>
+    <nav aria-label="Разделы"><a href="play.html">Стол с тренером</a><a href="pushfold.html">Пуш/фолд</a><a href="calc.html">Калькулятор</a><a href="outs.html">Ауты</a><a href="guide.html">Шпаргалка</a><a href="stats.html">Статистика</a><a href="https://t.me/ilya21314" target="_blank" rel="noopener">Отзыв</a></nav>
+  </div>
+
+  <div class="hero">
+    <div>
+      <h1>Покерный тренажёр, который <em>объясняет ошибки</em></h1>
+      <p class="lead">Садись за стол на 9 игроков против ботов разных стилей. После каждого решения тренер говорит, где ты ошибся, сколько это стоит и как сыграть лучше.</p>
+      <div class="cta">
+        <a class="btn primary" href="play.html">Сесть за стол →</a>
+        <a class="btn" href="pushfold.html">Пуш/фолд</a>
+        <a class="btn" href="calc.html">Калькулятор</a>
+      </div>
+      <div class="fine"><span>Бесплатно</span><span>Без регистрации</span><span>Без ставок на деньги</span></div>
+    </div>
+    <div class="demo" aria-hidden="true">
+      <div class="felt">
+        <div class="cards"><div class="c r">K<small>♥</small></div><div class="c r">7<small>♥</small></div><div class="c">2<small>♣</small></div></div>
+        <div class="potl">Банк 1 450</div>
+        <div class="hand"><div class="c r">A<small>♥</small></div><div class="c r">J<small>♥</small></div></div>
+      </div>
+      <div class="bubble"><b>Тренер</b><br>Колл лучше фолда: у тебя флеш-дро и туз — около 10 чистых аутов. Нужно 18% эквити, у тебя около 40%.<div class="n">ставка 400 · банк 1 450 · нужно 18% · есть ~40%</div></div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>Всё, чтобы перестать раздавать фишки</h2>
+    <p class="sub">Сделано для тех, кто играет живые турниры и кэш в клубе и хочет перестать раздавать фишки.</p>
+    <div class="grid3">
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="12" rx="10" ry="7"/><path d="M8 12h8"/></svg></div><h3>Стол на 9 игроков</h3><p>Колл-станции, тайтовые, агрессивные и маньяки — как в настоящем клубе. Режим кэша с докупами и турнир на вылет с растущими блайндами.</p><a href="play.html">Играть →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>Тренер на каждом ходу</h3><p>Оценивает решение, показывает шансы и размер банка, подсказывает олл-ин или фолд на коротком стеке и запоминает твои частые ошибки.</p><a href="play.html">Попробовать →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16M7 15l3-4 3 2 4-6"/></svg></div><h3>Ауты и шансы</h3><p>Считаешь ауты, процент на тёрне и ривере и решаешь, выгоден ли колл. Правило 2 и 4 и шансы банка доводятся до автоматизма.</p><a href="outs.html">Тренироваться →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><h3>Пуш/фолд</h3><p>Короткий стек в турнире: олл-ин или фолд? Решаешь за секунду и сразу видишь таблицу для своей позиции и стека. Плюс режим колла чужого олл-ина.</p><a href="pushfold.html">Решать →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h2M14 10h2M8 14h2M14 14h2M8 18h2M14 18h2"/></svg></div><h3>Калькулятор шансов</h3><p>Рука против руки на префлопе, флопе, тёрне и ривере: до 4 рук или случайная рука соперника. Показывает ауты и что у кого собрано.</p><a href="calc.html">Посчитать →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg></div><h3>Шпаргалка</h3><p>Позиции, с чем входить, размер рейза, игра по стеку в ББ, шансы и ауты, термины — всё на одной странице, удобно открыть с телефона прямо в клубе.</p><a href="guide.html">Открыть →</a></div>
+      <div class="f"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.6 3.2-1 5-2.6 6.8C8 10.4 6.5 12 6.5 14.8a5.5 5.5 0 0 0 11 0c0-2.3-1-4.1-2.2-5.4-.2 1.4-.9 2.5-2 3 .5-3.3-.1-7.2-1.3-10.4z"/></svg></div><h3>Серия дней</h3><p>Дневная цель и ударный режим, как в языковых приложениях: 20 раздач или задач в день — и навык растёт без зубрёжки.</p><a href="stats.html#streak">Моя серия →</a></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap mistakes">
+    <div>
+      <h2>Видишь, где теряешь фишки</h2>
+      <p class="sub" style="margin-bottom:0">Тренер копит статистику твоих ошибок и напоминает о них перед ходом. В разделе «Моя статистика» — карта рук, результаты по позициям, история турниров и раздач.</p>
+    </div>
+    <div class="mlist">
+      <div class="m"><span class="k">×12</span><b>Лимп вместо рейза</b><span>Заходишь коллом блайнда — открывай рейзом или сбрасывай.</span></div>
+      <div class="m"><span class="k">×8</span><b>Колл рейза со слабой рукой</b><span>Против рейза нужна рука сильнее, чем для открытия.</span></div>
+      <div class="m"><span class="k">×5</span><b>Фолд выгодного колла олл-ина</b><span>Шансы банка говорят «колл», а ты сбросил.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2>С чего начать, если ты новичок</h2>
+    <p class="sub">Три шага по 5–15 минут. Регистрация не нужна — открыл и играешь.</p>
+    <ol class="steps">
+      <li><b>Позиции и с чем входить</b><span>Пролистай шпаргалку: где ты сидишь и какие руки играть. Это половина успеха до флопа.</span><a class="go" href="guide.html#pos">Открыть шпаргалку →</a></li>
+      <li><b>20 задач на пуш/фолд</b><span>Короткий стек — главное место, где теряют турниры. Реши 20 ситуаций и сверься с таблицей.</span><a class="go" href="pushfold.html">Решать задачи →</a></li>
+      <li><b>Турнир с подсказками</b><span>Сыграй турнир на вылет: тренер подскажет до хода и разберёт каждое решение.</span><a class="go" href="play.html?mode=tour&amp;hint=1">Сесть за турнир →</a></li>
+    </ol>
+    <p class="sub" style="margin:20px 0 0">Дальше — по 20 раздач или задач в день: так держится серия дней, а навык растёт без зубрёжки.</p>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap faq">
+    <h2>Вопросы</h2>
+    <details><summary>Это игра на деньги?</summary><p>Нет. Флоп — обучающий тренажёр. Фишки виртуальные, их нельзя купить, вывести или обменять. Ставок и выигрышей нет.</p></details>
+    <details><summary>Нужна регистрация?</summary><p>Нет. Статистика и твои частые ошибки хранятся только в твоём браузере. Если очистить данные сайта или открыть его на другом устройстве, статистика начнётся заново.</p></details>
+    <details><summary>Работает на телефоне?</summary><p>Да, и на телефоне, и на компьютере. Приложение ставить не нужно.</p></details>
+    <details><summary>Насколько сильные боты?</summary><p>Боты играют как типичные игроки живых клубов: кто-то коллирует всё подряд, кто-то ждёт только сильные руки, кто-то давит ставками. Это лучшая практика для турниров и кэша с новичками. Против профессионалов готовят солверы.</p></details>
+    <details><summary>Нашёл ошибку или есть идея?</summary><p>Напиши автору в Telegram: <a href="https://t.me/ilya21314" target="_blank" rel="noopener">@ilya21314</a>. Сайт делается для игроков живых клубов, поэтому любой отзыв сразу идёт в работу.</p></details>
+    <details><summary>Можно разобрать свои раздачи?</summary><p>Да. В статистике есть кнопка «Скопировать историю раздач» — история в формате PokerStars, её понимают популярные анализаторы.</p></details>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="final">
+    <h2>Сыграй первую раздачу</h2>
+    <p>Займёт минуту. Тренер начнёт подсказывать сразу.</p>
+    <div class="cta" style="justify-content:center;margin:0"><a class="btn primary" href="play.html">Сесть за стол</a><a class="btn" href="pushfold.html">Пуш/фолд</a></div>
+  </div>
+  <footer>
+    <div>© <span id="yr">2026</span> Флоп · обучающий тренажёр. Без ставок и выигрышей, не является азартной игрой. 18+</div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap"><a href="https://t.me/ilya21314" target="_blank" rel="noopener">Написать автору в Telegram</a><a href="privacy.html">Политика конфиденциальности</a></div>
+  </footer>
+</div>
+<script>document.getElementById('yr').textContent=new Date().getFullYear();</script>
+<script src="site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр пуш/фолд — Флоп</title>
+<meta name="description" content="Тренажёр олл-ин или фолд для коротких стеков в турнирах: позиция, стек в ББ, рука — реши за секунду и сверься с таблицей.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Флоп">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Тренажёр пуш/фолд — Флоп">
+<meta property="og:description" content="Тренажёр олл-ин или фолд для коротких стеков в турнирах: позиция, стек в ББ, рука — реши за секунду и сверься с таблицей.">
+<meta property="og:url" content="https://poker-trener.ru/pushfold.html">
+<meta property="og:image" content="https://poker-trener.ru/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f6a4c">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Флоп">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* Layout: nav, title + mode switch + score, then the spot card (seat ring, hand, question, two big buttons), then feedback with the range grid. */
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --ink:#141a17; --ink2:#47524d; --muted:#6f7a75; --line:#d9dfdb; --grid:#e8ece9;
+  --felt:#1f6a4c; --felt-edge:#174f39; --felt-ink:#e9f4ee; --rail:#3a2f27;
+  --accent:#1f6a4c; --accent-ink:#ffffff; --good:#1d7a4a; --bad:#cc3f37; --ok:#b07400; --shove:#d9480f;
+  --card:#ffffff; --c-s:#1a1a1a; --c-h:#cf2f2f; --c-d:#2d64c8; --c-c:#1c8a3e;
+  --display:"Unbounded","Onest",system-ui,sans-serif; --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --good:#4cbb7f; --bad:#ec6b63; --ok:#e0a63a; --shove:#ff8a4c; --card:#f4f4f1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --good:#4cbb7f; --bad:#ec6b63; --ok:#e0a63a; --shove:#ff8a4c; --card:#f4f4f1; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.app{max-width:980px;margin:0 auto;padding-block:14px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:end;justify-content:space-between}
+h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0}
+.sub{margin:4px 0 0;color:var(--ink2);font-size:14px;max-width:40em}
+.score{display:flex;gap:16px}
+.score div{display:flex;flex-direction:column}
+.score b{font-family:var(--mono);font-size:17px}
+.score span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;color:var(--ink2);font:500 14px var(--body);padding:9px 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.spot{background:var(--felt);background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--felt) 85%,#fff),var(--felt) 60%,var(--felt-edge));color:var(--felt-ink);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;box-shadow:inset 0 0 0 6px var(--rail)}
+.ring{width:100%;max-width:360px}
+.ring text{font:700 10.5px var(--mono);fill:var(--ink)}
+.facts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.fact{background:rgba(0,0,0,.28);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600}
+.fact b{font-family:var(--mono)}
+.fact.shove{background:color-mix(in srgb,var(--shove) 75%,#000);color:#fff}
+.hand{display:flex;gap:8px}
+.card{width:64px;height:90px;border-radius:9px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.card .r{font-size:30px}.card .s{font-size:22px}
+.su-s{color:var(--c-s)}.su-h{color:var(--c-h)}.su-d{color:var(--c-d)}.su-c{color:var(--c-c)}
+.q{font-weight:600;font-size:16px;text-align:center}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.abtn{border:0;border-radius:12px;min-height:54px;font:700 17px var(--body);cursor:pointer}
+.abtn.fold{background:color-mix(in srgb,var(--bad) 20%,var(--surface));color:var(--bad)}
+.abtn.go{background:var(--shove);color:#fff}
+.abtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.abtn:disabled{opacity:.4;cursor:default}
+.abtn.next{grid-column:1/-1;background:var(--surface);color:var(--ink)}
+.kbd{font-size:11.5px;opacity:.75;text-align:center}
+.fb{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.verdict{font-family:var(--display);font-weight:700;font-size:20px}
+.verdict.good{color:var(--good)}.verdict.bad{color:var(--bad)}
+.expl{margin:0;color:var(--ink)}
+.nums{font-family:var(--mono);font-size:13px;color:var(--ink2);background:var(--bg);border-radius:10px;padding:10px 12px;line-height:1.6}
+.hgrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px}
+.hc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font:600 9.5px var(--mono);letter-spacing:-.04em;background:var(--grid);color:var(--muted)}
+.hc.in{background:color-mix(in srgb,var(--shove) 70%,var(--surface));color:#fff}
+.hc.me{outline:2.5px solid var(--ink);outline-offset:-1px;position:relative;z-index:1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);align-items:center}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:5px}
+.placeholder{color:var(--muted);font-size:14px}
+.tips{font-size:13.5px;color:var(--ink2);margin:0;padding-left:18px}
+.tips li{margin:3px 0}
+@media (max-width:820px){.main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){
+  h1{font-size:19px}.sub{font-size:13px}
+  header{gap:8px}.score{gap:14px;width:100%;justify-content:space-between}
+  .seg{width:100%}.seg button{flex:1 1 0;padding:9px 6px}
+  .spot{padding:12px;border-radius:16px;gap:10px}
+  .card{width:58px;height:82px}.card .r{font-size:27px}.card .s{font-size:20px}
+  .hc{font-size:7px}.hgrid{gap:1.5px}
+  .kbd{display:none}
+}
+</style>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<div class="app">
+  <nav class="sitenav" aria-label="Разделы"><a class="brand" href="./">Флоп</a><a href="play.html">Стол с тренером</a><a href="pushfold.html" aria-current="page">Пуш/фолд</a><a href="calc.html">Калькулятор</a><a href="outs.html">Ауты</a><a href="guide.html">Шпаргалка</a><a href="stats.html">Статистика</a></nav>
+  <header>
+    <div><h1>Пуш/фолд</h1><p class="sub">Стек 15 ББ и меньше: либо олл-ин, либо фолд. Реши за пару секунд — как за столом.</p></div>
+    <div class="score"><div><b id="scN">0</b><span>решено</span></div><div><b id="scAcc">—</b><span>точность</span></div><div><b id="scRun">0</b><span>подряд</span></div></div>
+  </header>
+  <div class="controls">
+    <div class="seg" id="segMode" role="group" aria-label="Режим"><button type="button" data-v="push" aria-pressed="true">Первым в банк</button><button type="button" data-v="call" aria-pressed="false">Колл олл-ина</button></div>
+  </div>
+  <div class="main">
+    <section class="spot" aria-live="polite">
+      <svg class="ring" id="ring" viewBox="0 0 360 200" role="img" aria-label="Стол"></svg>
+      <div class="facts" id="facts"></div>
+      <div class="hand" id="hand"></div>
+      <div class="q" id="q"></div>
+      <div class="btns" id="btns"></div>
+      <div class="kbd" id="kbd"></div>
+    </section>
+    <section class="fb" id="fb">
+      <div class="placeholder" id="ph">Ответь — здесь появится разбор и таблица диапазона для этой ситуации.</div>
+      <div id="res" hidden>
+        <div class="verdict" id="verdict"></div>
+        <p class="expl" id="expl"></p>
+        <div class="nums" id="nums"></div>
+      </div>
+      <div id="gridWrap" hidden>
+        <div style="font-weight:600;margin-bottom:8px" id="gridTitle"></div>
+        <div class="hgrid" id="grid" aria-hidden="true"></div>
+        <div class="legend" style="margin-top:8px"><span><span class="sw" style="background:color-mix(in srgb,var(--shove) 70%,var(--surface))"></span><span id="lgIn">олл-ин</span></span><span><span class="sw" style="background:var(--grid)"></span>фолд</span><span><span class="sw" style="outline:2px solid var(--ink);outline-offset:-2px"></span>твоя рука</span></div>
+      </div>
+      <ul class="tips" id="tips">
+        <li>Чем позже позиция, тем шире олл-ин: за тобой меньше игроков, которые могут проснуться с сильной рукой.</li>
+        <li>Чем короче стек, тем шире олл-ин: блайнды съедают стек, ждать уже нельзя.</li>
+        <li>Коллировать чужой олл-ин нужно рукой сильнее, чем пушить самому.</li>
+      </ul>
+    </section>
+  </div>
+</div>
+<script src="ranges.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const POS9=['UTG','UTG1','MP','LJ','HJ','CO','BTN','SB','BB'];
+const POS_RU={UTG:'UTG',UTG1:'UTG+1',MP:'MP',LJ:'LJ',HJ:'HJ',CO:'CO',BTN:'баттон',SB:'МБ',BB:'ББ'};
+const BUCKET_RU={b5:'до 6 ББ',b10:'6–10 ББ',b15:'10–15 ББ'};
+const bucketOf=s=>s<=6?'b5':s<=10?'b10':'b15';
+const groupOf=p=>(p==='SB'||p==='BTN')?'BTN':GROUP[p];
+const pct=x=>Math.round(x*100)+'%';
+const fmt=x=>(Math.round(x*10)/10).toString().replace('.',',');
+let mode='push', S=null, ST={n:0,ok:0,run:0};
+try{ Object.assign(ST,JSON.parse(localStorage.getItem('pf_stats')||'{}')); const m=localStorage.getItem('pf_mode'); if(m) mode=m; }catch(e){}
+function saveST(){ try{ localStorage.setItem('pf_stats',JSON.stringify(ST)); }catch(e){} }
+function combos(set){ let n=0; set.forEach(c=>n+=c.length===2?6:c[2]==='s'?4:12); return n/1326; }
+function cardHTML(c){ const s=SUITS[c&3], r=RANKS[c>>2]; return `<div class="card"><span class="r su-${s}">${r==='T'?'10':r}</span><span class="s su-${s}">${SUIT_SYM[s]}</span></div>`; }
+function deal2(){ const a=(Math.random()*52)|0; let b; do{ b=(Math.random()*52)|0; }while(b===a); return [a,b]; }
+function cardsFor(cls){ // random concrete cards for a class
+  const r1=RANKS.indexOf(cls[0]), r2=RANKS.indexOf(cls[1]); const s1=(Math.random()*4)|0; let s2=s1;
+  if(cls.length===2||cls[2]==='o'){ do{ s2=(Math.random()*4)|0; }while(s2===s1); }
+  return [r1*4+s1, r2*4+s2];
+}
+function equityVsRange(hero,range,iters){
+  const classes=[...range]; let win=0;
+  for(let i=0;i<iters;i++){
+    let v; for(let t=0;t<30;t++){ const c=cardsFor(classes[(Math.random()*classes.length)|0]); if(c[0]!==hero[0]&&c[0]!==hero[1]&&c[1]!==hero[0]&&c[1]!==hero[1]){ v=c; break; } }
+    if(!v) continue;
+    const used=new Set([...hero,...v]), board=[]; while(board.length<5){ const c=(Math.random()*52)|0; if(!used.has(c)){ used.add(c); board.push(c); } }
+    const a=evalHand([...hero,...board]), b=evalHand([...v,...board]); win+=a>b?1:a===b?.5:0;
+  }
+  return win/iters;
+}
+function allClasses(){ const out=[]; for(let i=0;i<13;i++) for(let j=0;j<13;j++){ const a=ORD[i],b=ORD[j]; out.push(i===j?a+a:i<j?a+b+'s':b+a+'o'); } return out; }
+const ALL=allClasses();
+function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
+
+function genPush(){
+  const pos=pick(['UTG','UTG1','MP','LJ','HJ','CO','BTN','BTN','SB','SB']);
+  const stack=pick([3,4,5,5,6,7,8,8,9,10,11,12,13,14,15]);
+  const b=bucketOf(stack), g=groupOf(pos), R=PUSH[b][g];
+  const TG={BTN:'LATE',LATE:'MP',MP:'EP',EP:null};
+  const nb=[b==='b15'?PUSH.b10[g]:b==='b10'?PUSH.b5[g]:null, b==='b5'?PUSH.b10[g]:b==='b10'?PUSH.b15[g]:null, PUSH[b][LOOSER[g]], TG[g]?PUSH[b][TG[g]]:null].filter(N=>N&&N!==R);
+  const border=ALL.filter(c=>nb.some(N=>N.has(c)!==R.has(c)));
+  const cls = Math.random()<0.6&&border.length ? pick(border) : pick(ALL);
+  const cards=cardsFor(cls);
+  return {mode:'push',pos,stack,b,g,R,cls,cards,ans:R.has(cls)?'go':'fold'};
+}
+function genCall(){
+  const vpos=pick(['UTG','MP','HJ','CO','CO','BTN','BTN','SB','SB','SB']);
+  const stack=pick([4,5,6,7,8,9,10,11,12,13,14,15]);
+  const b=bucketOf(stack), g=groupOf(vpos), R=PUSH[b][g];
+  const extra=vpos==='SB'?0:0.5, cost=stack-1, potAfter=2*stack+extra, need=cost/potAfter;
+  let best=null;
+  for(let k=0;k<7;k++){ const cls=pick(ALL), cards=cardsFor(cls); const eq=equityVsRange(cards,R,500); const d=Math.abs(eq-need); if(!best||d<best.d) best={cls,cards,eq,d}; if(Math.random()<0.25) break; }
+  const eq=equityVsRange(best.cards,R,3000);
+  return {mode:'call',pos:'BB',vpos,stack,b,g,R,cls:best.cls,cards:best.cards,eq,need,cost,potAfter,extra,ans:eq>=need?'go':'fold'};
+}
+function ring(){
+  const pos=S.mode==='push'?S.pos:'BB'; const hi=POS9.indexOf(pos), vi=S.mode==='call'?POS9.indexOf(S.vpos):-1;
+  let out=`<ellipse cx="180" cy="100" rx="150" ry="74" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"/>`;
+  POS9.forEach((p,i)=>{ const a=Math.PI/2+(i-hi)*2*Math.PI/9; const x=180+150*Math.cos(a), y=100+74*Math.sin(a);
+    const before = S.mode==='push' ? i<hi : (i!==vi && i!==hi);
+    const isMe=i===hi, isV=i===vi; const fill=isMe?'#fff':isV?'var(--shove)':before?'rgba(0,0,0,.35)':'rgba(255,255,255,.75)';
+    const tc=isMe?'#141a17':isV?'#fff':before?'rgba(255,255,255,.55)':'#141a17';
+    out+=`<g><rect x="${x-24}" y="${y-12}" width="48" height="24" rx="12" fill="${fill}" ${isMe?'stroke="var(--shove)" stroke-width="2.5"':''}/><text x="${x}" y="${y+4}" text-anchor="middle" style="fill:${tc}">${POS_RU[p].replace('баттон','BTN').replace('МБ','SB').replace('ББ','BB')}</text></g>`;
+  });
+  out+=`<text x="180" y="104" text-anchor="middle" style="fill:rgba(255,255,255,.8);font:600 12px var(--body)">${S.mode==='push'?'до тебя все сбросили':'олл-ин → тебе'}</text>`;
+  $('ring').innerHTML=out; $('ring').setAttribute('aria-label',S.mode==='push'?`Ты на ${POS_RU[S.pos]}, до тебя все сбросили`:`Олл-ин с ${POS_RU[S.vpos]}, ты на большом блайнде`);
+}
+function render(){
+  ring();
+  $('facts').innerHTML = S.mode==='push'
+    ? `<span class="fact">Позиция <b>${POS_RU[S.pos]}</b></span><span class="fact">Стек <b>${S.stack} ББ</b></span>`
+    : `<span class="fact shove">Олл-ин ${POS_RU[S.vpos]} на <b>${S.stack} ББ</b></span><span class="fact">Ты на ББ</span>`;
+  $('hand').innerHTML=S.cards.map(cardHTML).join('');
+  $('q').textContent=S.mode==='push'?'Олл-ин или фолд?':`Колл ${fmt(S.cost)} ББ — или фолд?`;
+  $('btns').innerHTML=`<button type="button" class="abtn fold" id="bFold">Фолд</button><button type="button" class="abtn go" id="bGo">${S.mode==='push'?'Олл-ин':'Колл'}</button>`;
+  $('kbd').textContent=`Клавиши: F — фолд, ${S.mode==='push'?'A — олл-ин':'C — колл'}`;
+  $('bFold').onclick=()=>answer('fold'); $('bGo').onclick=()=>answer('go');
+  $('ph').hidden=false; $('res').hidden=true; $('gridWrap').hidden=true;
+  document.querySelectorAll('#segMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===mode));
+}
+function grid(){
+  let h=''; ALL.forEach(c=>{ h+=`<div class="hc${S.R.has(c)?' in':''}${c===S.cls?' me':''}">${c}</div>`; });
+  $('grid').innerHTML=h; $('gridWrap').hidden=false;
+  $('gridTitle').textContent=S.mode==='push'?`Олл-ин с ${POS_RU[S.pos]} при стеке ${BUCKET_RU[S.b]} — ${pct(combos(S.R))} рук`:`Чем пушит ${POS_RU[S.vpos]} на ${BUCKET_RU[S.b]} — ${pct(combos(S.R))} рук`;
+  $('lgIn').textContent=S.mode==='push'?'олл-ин':'его олл-ин';
+}
+function answer(a){
+  if(S.done) return; S.done=true; const good=a===S.ans;
+  ST.n++; if(good){ ST.ok++; ST.run++; } else ST.run=0; saveST(); score();
+  if(window.Flop) Flop.track('p');
+  $('ph').hidden=true; $('res').hidden=false;
+  $('verdict').className='verdict '+(good?'good':'bad');
+  const right=S.mode==='push'?(S.ans==='go'?'олл-ин':'фолд'):(S.ans==='go'?'колл':'фолд');
+  $('verdict').textContent=good?`Верно — ${right}`:`Ошибка — здесь ${right}`;
+  if(S.mode==='push'){
+    const inR=S.ans==='go', share=pct(combos(S.R));
+    const why = inR
+      ? (S.stack<=6?'При таком коротком стеке ждать нельзя: блайнды скоро съедят стек, а олл-ин часто забирает их без борьбы.':'Рука достаточно сильна, чтобы забрать блайнды или выиграть при колле достаточно часто.')
+      : (['UTG','UTG1','MP','LJ'].includes(S.pos)?'За тобой ещё много игроков — велик шанс наткнуться на руку сильнее. С ранних позиций диапазон узкий.':'Рука слишком слабая даже для этой позиции: при колле ты почти всегда сильно позади.');
+    $('expl').textContent=`${S.cls} ${inR?'входит':'не входит'} в таблицу олл-ина для ${POS_RU[S.pos]} при стеке ${BUCKET_RU[S.b]}. ${why}`;
+    $('nums').innerHTML=`Позиция: ${POS_RU[S.pos]} · стек ${S.stack} ББ<br>Олл-ин здесь: ${share} рук<br>Рука: ${S.cls}`;
+  } else {
+    $('expl').textContent=`Против того, чем обычно идут олл-ин с ${POS_RU[S.vpos]} на ${S.stack} ББ, у ${S.cls} около ${pct(S.eq)} эквити, а для колла нужно ${pct(S.need)}. ${S.ans==='go'?'Шансов хватает — колл, даже если иногда проиграешь.':'Шансов не хватает — фолд, даже если рука выглядит красиво.'}`;
+    $('nums').innerHTML=`Колл: ${fmt(S.cost)} ББ (большой блайнд уже в банке)<br>Банк после колла: ${fmt(S.potAfter)} ББ<br>Нужно эквити: ${fmt(S.cost)} / ${fmt(S.potAfter)} = <b>${pct(S.need)}</b><br>Твоё эквити против его диапазона: <b>${pct(S.eq)}</b>`;
+  }
+  grid();
+  $('btns').innerHTML=`<button type="button" class="abtn next" id="bNext">Следующая ситуация →</button>`; $('bNext').onclick=next; $('bNext').focus({preventScroll:true});
+  $('kbd').textContent='Enter или пробел — следующая';
+}
+function score(){ $('scN').textContent=ST.n; $('scAcc').textContent=ST.n?pct(ST.ok/ST.n):'—'; $('scRun').textContent=ST.run; }
+function next(){ S=mode==='push'?genPush():genCall(); render(); }
+$('segMode').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.v; try{ localStorage.setItem('pf_mode',mode); }catch(_){} next(); };
+document.addEventListener('keydown',e=>{ if(e.target.closest('input,textarea')) return; const k=e.key.toLowerCase();
+  if(!S.done){ if(k==='f'||k==='а') answer('fold'); else if(k==='a'||k==='c'||k==='ф'||k==='с') answer('go'); }
+  else if(k==='enter'||k===' '){ e.preventDefault(); next(); } });
+score(); next();
+</script>
+<script src="site.js" defer></script>
+</body>
+</html>

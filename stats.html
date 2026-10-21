@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Моя статистика — Флоп</title>
+<meta name="description" content="Статистика игры в тренажёре: частые ошибки, карта рук, позиции, турниры и история раздач.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Флоп">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Моя статистика — Флоп">
+<meta property="og:description" content="Статистика игры в тренажёре: частые ошибки, карта рук, позиции, турниры и история раздач.">
+<meta property="og:url" content="https://poker-trener.ru/stats.html">
+<meta property="og:image" content="https://poker-trener.ru/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f6a4c">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Флоп">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* Layout: nav, title + mode filter, KPI tiles, then cards: mistakes | hand map, positions | result chart, tournaments, recent mistakes, hand history. */
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --ink:#141a17; --ink2:#47524d; --muted:#6f7a75; --line:#d9dfdb; --grid:#e8ece9;
+  --accent:#1f6a4c; --accent-ink:#ffffff;
+  --seq:#1f6a4c; --pos:#2a78d6; --neg:#d03b3b; --mid:#f0efec;
+  --display:"Unbounded","Onest",system-ui,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --accent:#47b383; --accent-ink:#06140d; --seq:#5cc493; --pos:#5598e7; --neg:#ec6b63; --mid:#383835; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --accent:#47b383; --accent-ink:#06140d; --seq:#5cc493; --pos:#5598e7; --neg:#ec6b63; --mid:#383835; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+.app{max-width:1240px;margin:0 auto;padding-block:14px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.sitenav{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;font-size:14px}
+.sitenav a{color:var(--ink2);text-decoration:none;font-weight:500}
+.sitenav a:hover{color:var(--ink);text-decoration:underline}
+.sitenav .brand{font-family:var(--display);font-weight:700;color:var(--ink);font-size:16px;margin-right:6px}
+.sitenav a[aria-current]{color:var(--ink);font-weight:700}
+header{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;color:var(--ink2);font:500 14px var(--body);padding:8px 14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.kpi b{font-family:var(--mono);font-size:22px;font-weight:700}
+.kpi span{font-size:12.5px;color:var(--ink2)}
+.kpi em{font-style:normal;font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-family:var(--display);font-weight:500;font-size:17px;margin:0}
+.card .note{font-size:12.5px;color:var(--ink2);margin:0}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.empty{color:var(--muted);font-size:13px;padding:8px 0}
+/* mistakes bars */
+.mbars{display:flex;flex-direction:column;gap:10px}
+.mb{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px}
+.mb .t{font-weight:600}
+.mb .n{font-family:var(--mono);font-weight:700;text-align:right}
+.mb .bar{grid-column:1/-1;height:8px;border-radius:4px;background:var(--grid);position:relative;overflow:hidden}
+.mb .bar i{position:absolute;inset:0 auto 0 0;border-radius:4px;background:var(--neg)}
+.mb .d{grid-column:1/-1;font-size:12.5px;color:var(--ink2)}
+/* hand map */
+.hgrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px;position:relative}
+.hc{aspect-ratio:1;border-radius:4px;display:flex;align-items:center;justify-content:center;font:600 10px var(--mono);letter-spacing:-.04em;background:var(--grid);color:var(--muted);cursor:default;user-select:none}
+.hc.on{color:var(--ink)}
+.hc.dark{color:#fff}
+.hc:hover,.hc:focus-visible{outline:2px solid var(--ink);outline-offset:-1px}
+.legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.ramp{height:10px;width:140px;border-radius:5px}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12.5px;padding:7px 10px;border-radius:8px;max-width:240px;line-height:1.4}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:600;color:var(--ink2);text-align:right;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:7px 8px;border-bottom:1px solid var(--grid);text-align:right;font-family:var(--mono);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td.txt{font-family:var(--body)}
+.pos{color:var(--pos)} .neg{color:var(--neg)}
+.tblwrap{overflow-x:auto}
+/* chart */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ax{font:11px var(--mono);fill:var(--muted)}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .zero{stroke:var(--muted);stroke-width:1}
+/* mistakes list */
+.mlist{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto}
+.mi{border-left:3px solid var(--neg);padding:4px 0 4px 10px}
+.mi .h{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 14px;font:500 14px var(--body);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--neg)}
+.arow{display:flex;gap:8px;flex-wrap:wrap}
+.hero-empty{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:32px 20px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.hero-empty h2{font-family:var(--display);font-size:20px;margin:0}
+.hero-empty p{margin:0;color:var(--ink2);max-width:36em}
+.streakc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px 24px;align-items:center}
+.sbig{display:flex;align-items:center;gap:12px}
+.sbig svg{width:44px;height:44px;color:#ea580c}
+.sbig.off svg{color:var(--muted)}
+.sbig b{font-family:var(--mono);font-size:34px;line-height:1}
+.sbig span{display:block;font-size:13px;color:var(--ink2)}
+.sprog{display:flex;flex-direction:column;gap:6px}
+.sbar{height:10px;border-radius:5px;background:var(--grid);overflow:hidden}
+.sbar i{display:block;height:100%;border-radius:5px;background:#ea580c}
+.srow{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}
+.goalsel{display:inline-flex;gap:4px;align-items:center}
+.goalsel button{border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:7px;padding:2px 8px;font:600 12px var(--mono);cursor:pointer}
+.goalsel button[aria-pressed="true"]{border-color:#ea580c;color:#ea580c}
+.cal{grid-column:1/-1;display:flex;gap:3px;overflow-x:auto;padding-bottom:2px}
+.cal .wk{display:flex;flex-direction:column;gap:3px}
+.cal .d{width:14px;height:14px;border-radius:3px;background:var(--grid)}
+.cal .d.f{outline:2px solid var(--ink);outline-offset:-2px}
+.cal .d.x{visibility:hidden}
+.calleg{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.calleg .d{width:12px;height:12px;border-radius:3px;display:inline-block}
+@media (max-width:520px){.streakc{grid-template-columns:minmax(0,1fr)}.cal .d{width:12px;height:12px}}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.grid2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.hc{font-size:7.5px;border-radius:3px}.hgrid{gap:1.5px}.card{padding:14px 12px}}
+</style>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<div class="app">
+  <nav class="sitenav" aria-label="Разделы"><a class="brand" href="./">Флоп</a><a href="play.html">Стол с тренером</a><a href="pushfold.html">Пуш/фолд</a><a href="calc.html">Калькулятор</a><a href="outs.html">Ауты</a><a href="guide.html">Шпаргалка</a><a href="stats.html" aria-current="page">Статистика</a></nav>
+  <header>
+    <h1>Моя статистика</h1>
+    <div class="seg" id="segMode" role="group" aria-label="Режим"><button type="button" data-v="all" aria-pressed="true">Всё</button><button type="button" data-v="c" aria-pressed="false">Кэш</button><button type="button" data-v="t" aria-pressed="false">Турниры</button></div>
+  </header>
+
+  <section class="card" id="streak" style="margin-bottom:0">
+    <div class="chead"><h2>Ударный режим</h2><span class="goalsel" id="goalsel" role="group" aria-label="Цель на день">цель в день: <button type="button" data-g="10">10</button><button type="button" data-g="20">20</button><button type="button" data-g="40">40</button></span></div>
+    <div class="streakc" id="streakc"></div>
+    <p class="note">Очко — сыгранная раздача за столом, решённая задача на ауты или пуш/фолд. Набери дневную цель, чтобы серия не прервалась. Всё хранится только в этом браузере.</p>
+  </section>
+
+  <div id="emptyAll" class="hero-empty" hidden>
+    <h2>Здесь пока пусто</h2>
+    <p>Сыграй несколько раздач за столом — здесь появятся твои частые ошибки, карта рук, результаты по позициям и история турниров. Всё хранится только в этом браузере.</p>
+    <a class="btn primary" href="play.html">Сесть за стол</a>
+  </div>
+
+  <div id="main" hidden>
+    <div class="kpis" id="kpis"></div>
+
+    <div class="grid2" style="margin-top:16px">
+      <section class="card">
+        <div class="chead"><h2>Частые ошибки</h2></div>
+        <p class="note">Решения, которые тренер оценил как ошибку. Начни исправлять с верхней.</p>
+        <div class="mbars" id="mbars"></div>
+      </section>
+      <section class="card">
+        <div class="chead"><h2>Карта рук</h2>
+          <div class="seg" id="segMap" role="group" aria-label="Что показывать"><button type="button" data-v="play" aria-pressed="true">Как часто играю</button><button type="button" data-v="res" aria-pressed="false">Результат</button></div></div>
+        <div class="hgrid" id="hgrid" role="grid" aria-label="Карта стартовых рук"></div>
+        <div class="legend" id="hlegend"></div>
+        <p class="note">Над диагональю одномастные руки, под ней разномастные. Наведи на клетку — покажет, сколько раз рука пришла, как часто ты её играл и сколько выиграл.</p>
+      </section>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <section class="card">
+        <h2>По позициям</h2>
+        <div class="tblwrap"><table id="tpos"></table></div>
+        <p class="note">Норма входа: ранние позиции 10–15%, поздние 25–40%. Блайнды почти всегда в минусе — это нормально.</p>
+      </section>
+      <section class="card">
+        <div class="chead"><h2>Результат по раздачам</h2></div>
+        <p class="note" id="chNote">Накопленный выигрыш в больших блайндах (ББ).</p>
+        <div class="chart" id="chart"></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:16px" id="toursCard">
+      <h2>Турниры</h2>
+      <div class="tblwrap"><table id="ttours"></table></div>
+    </section>
+
+    <section class="card" style="margin-top:16px" id="cashCard">
+      <h2>Кэш-сессии</h2>
+      <div class="tblwrap"><table id="tcash"></table></div>
+    </section>
+
+    <div class="grid2" style="margin-top:16px">
+      <section class="card">
+        <h2>Последние ошибки</h2>
+        <div class="mlist" id="mlist"></div>
+      </section>
+      <section class="card">
+        <h2>История раздач</h2>
+        <p class="note" id="histNote"></p>
+        <div class="arow"><button class="btn" id="bDl" type="button">Скачать .txt</button><button class="btn" id="bCopy" type="button">Скопировать</button></div>
+        <p class="note">Формат PokerStars — его понимают анализаторы раздач. Хранятся последние 300 раздач.</p>
+        <hr style="border:0;border-top:1px solid var(--line);width:100%;margin:4px 0">
+        <div class="arow"><button class="btn danger" id="bReset" type="button">Сбросить всю статистику</button></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+<script>
+const MT={limp:['Лимп вместо рейза или фолда','Рейз или фолд, без лимпа.'],open_wide:['Вход с рукой вне нормы','Сверься с нормой для позиции.'],size:['Размер рейза не по формуле','3 ББ + 1 ББ за лимпера, 3-бет ×3.'],pushfold:['Ошибка олл-ин/фолд при коротком стеке','При стеке до 15 ББ — олл-ин по таблице или фолд, без лимпов и мини-рейзов.'],fold_strong:['Фолд хорошей руки до флопа','Рука в норме, её стоит разыграть.'],bb_raise:['Рейз с ББ слабой рукой','На ББ без рейза слабой рукой — чек.'],fold_free:['Фолд при бесплатном чеке','Чек бесплатный.'],sb_complete:['Докинул на МБ без причины','На МБ: рейз или фолд, докидывай только с подходящими руками.'],call_raise_weak:['Колл рейза слабой рукой','Против рейза: 3-бет сильными, колл узкими, остальное фолд.'],light_3bet:['3-бет слабой рукой','3-бет — с QQ+, AK (шире только против поздних позиций).'],passive_strong:['Колл вместо рейза с сильной рукой','С сильной рукой рейзи.'],vs3bet_wide:['Продолжил против ре-рейза слишком широко','Против ре-рейза — QQ+ и AK.'],missed_value:['Упустил вэлью','С сильной рукой ставь ½–⅔ банка.'],bluff_multi:['Блеф/ставка слабой рукой против нескольких','Против нескольких соперников без руки — чек.'],bet_medium:['Ставка средней рукой','Средняя рука — чек, держи банк маленьким.'],fold_odds:['Фолд, когда колл выгоден','Сравни шансы с ценой колла.'],raise_medium:['Рейз средней рукой','Средняя рука — колл, не рейз.'],call_no_odds:['Колл без шансов','Если шансов меньше цены колла — фолд.'],raise_weak:['Рейз слабой рукой против ставки','Против ставки без руки — фолд.']};
+const $=id=>document.getElementById(id);
+const R='AKQJT98765432';
+const POS=['UTG','UTG1','MP','LJ','HJ','CO','BTN','SB','BB'];
+const POS_RU={UTG:'UTG',UTG1:'UTG+1',MP:'MP',LJ:'LJ',HJ:'HJ',CO:'CO',BTN:'Баттон',SB:'МБ',BB:'ББ'};
+const pct=x=>Math.round(x*100)+'%';
+const sgn=(x,d=1)=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(d).replace('.',',');
+const fmtD=t=>new Date(t).toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+const fmtDT=t=>new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+let D={v:1,hands:[],sessions:[],mistakes:[]}, mode='all', mapMode='play';
+try{ const x=JSON.parse(localStorage.getItem('flop_stats')||'null'); if(x&&x.v===1) D=x; }catch(e){}
+try{ const m=localStorage.getItem('st_mode'); if(m) mode=m; const mm=localStorage.getItem('st_map'); if(mm) mapMode=mm; }catch(e){}
+
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function mix(c1,c2,t){ // t: 0..1 from c1 to c2, hex colors
+  const p=h=>{h=h.replace('#','');return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));};
+  const a=p(c1),b=p(c2); return '#'+a.map((v,i)=>Math.round(v+(b[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+function lum(h){ h=h.replace('#',''); const [r,g,b]=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4); return .2126*r+.7152*g+.0722*b; }
+
+function render(){
+  const H=D.hands.filter(h=>mode==='all'||h.m===mode);
+  $('emptyAll').hidden=D.hands.length>0; $('main').hidden=D.hands.length===0;
+  document.querySelectorAll('#segMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===mode));
+  document.querySelectorAll('#segMap button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===mapMode));
+  if(!D.hands.length) return;
+  kpis(H); mistakes(H); handMap(H); positions(H); chart(H); tours(); cash(); recent(); hist();
+}
+
+function kpis(H){
+  const n=H.length, v=H.filter(h=>h.v).length, r=H.filter(h=>h.r).length, l=H.filter(h=>h.l).length;
+  const g=H.reduce((a,h)=>[a[0]+h.g[0],a[1]+h.g[1],a[2]+h.g[2]],[0,0,0]), gt=g[0]+g[1]+g[2];
+  const cashH=H.filter(h=>h.m==='c'), bb100=cashH.length?cashH.reduce((s,h)=>s+h.bb,0)/cashH.length*100:null;
+  const T=D.sessions.filter(s=>s.mode==='tour'&&s.place), avg=T.length?T.reduce((s,x)=>s+x.place,0)/T.length:null;
+  const tiles=[[n,'раздач',''],[n?pct(v/n):'—','вход в игру','норма 20–25%'],[n?pct(r/n):'—','рейз до флопа','чем ближе ко входу, тем лучше'],[n?pct(l/n):'—','лимпы','цель — 0%'],[gt?pct(g[0]/gt):'—','верных решений',`${g[2]} ошибок из ${gt}`]];
+  if(mode==='t') tiles.push([T.length?avg.toFixed(1).replace('.',','):'—','среднее место',T.length?`${T.length} турн., побед ${T.filter(x=>x.place===1).length}`:'нет законченных']);
+  else tiles.push([bb100==null?'—':sgn(bb100,0),'ББ на 100 раздач','кэш, выигрыш в ББ']);
+  $('kpis').innerHTML=tiles.map(([b,s,e])=>`<div class="kpi"><b>${b}</b><span>${s}</span>${e?`<em>${e}</em>`:''}</div>`).join('');
+}
+
+function mistakes(H){
+  const cnt={}; H.forEach(h=>(h.e||[]).forEach(k=>cnt[k]=(cnt[k]||0)+1));
+  const ks=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]).slice(0,7), mx=ks.length?cnt[ks[0]]:1;
+  $('mbars').innerHTML=ks.length?ks.map(k=>{ const t=(typeof MT!=='undefined'&&MT[k])||[k,'']; return `<div class="mb" title="${t[0]}: ${cnt[k]} раз"><span class="t">${t[0]}</span><span class="n">${cnt[k]}</span><div class="bar"><i style="width:${Math.max(4,cnt[k]/mx*100)}%"></i></div><span class="d">${t[1]}</span></div>`; }).join(''):'<div class="empty">Ошибок пока нет — или ещё мало раздач.</div>';
+}
+
+function cls(i,j){ return i===j?R[i]+R[j]:i<j?R[i]+R[j]+'s':R[j]+R[i]+'o'; }
+function handMap(H){
+  const by={}; H.forEach(h=>{ const o=by[h.c]||(by[h.c]={n:0,v:0,bb:0}); o.n++; o.v+=h.v; o.bb+=h.bb; });
+  const surf=css('--surface'), seq=css('--seq'), pos=css('--pos'), neg=css('--neg'), mid=css('--mid');
+  let maxAbs=1; Object.values(by).forEach(o=>{ if(o.v) maxAbs=Math.max(maxAbs,Math.abs(o.bb/o.n)); }); maxAbs=Math.min(maxAbs,30);
+  let html='';
+  for(let i=0;i<13;i++) for(let j=0;j<13;j++){
+    const c=cls(i,j), o=by[c]; let bg='', on=false;
+    if(o){ on=true;
+      if(mapMode==='play'){ const f=o.v/o.n; bg=mix(mix(surf,seq,.08),seq,f); }
+      else { if(!o.v){ bg=mix(surf,mid,.9); } else { const a=o.bb/o.n, t=Math.min(1,Math.abs(a)/maxAbs); bg=mix(mid,a>=0?pos:neg,.25+.75*t); } }
+    }
+    const dark=on&&lum(bg)<.32;
+    html+=`<div class="hc${on?' on':''}${dark?' dark':''}" tabindex="0" role="gridcell" data-c="${c}"${bg?` style="background:${bg}"`:''}>${c}</div>`;
+  }
+  $('hgrid').innerHTML=html;
+  $('hlegend').innerHTML=mapMode==='play'
+    ? `<span>не играю</span><span class="ramp" style="background:linear-gradient(90deg,${mix(surf,seq,.08)},${seq})"></span><span>играю всегда</span><span style="margin-left:8px">серая клетка — рука не приходила</span>`
+    : `<span>минус</span><span class="ramp" style="background:linear-gradient(90deg,${neg},${mid},${pos})"></span><span>плюс</span><span style="margin-left:8px">в среднем ББ за раздачу, только сыгранные руки</span>`;
+  const tip=$('tip');
+  const show=(el,x,y)=>{ const c=el.dataset.c,o=by[c]; tip.innerHTML=o?`<b>${c}</b><br>пришла ${o.n} раз, сыграл ${o.v} (${pct(o.v/o.n)})<br>итог ${sgn(o.bb)} ББ${o.v?`, в среднем ${sgn(o.bb/o.n)} ББ`:''}`:`<b>${c}</b><br>ещё не приходила`; tip.hidden=false;
+    const r=tip.getBoundingClientRect(); tip.style.left=Math.min(innerWidth-r.width-8,Math.max(8,x+12))+'px'; tip.style.top=Math.max(8,y-r.height-12)+'px'; };
+  $('hgrid').onmousemove=e=>{ const el=e.target.closest('.hc'); if(el) show(el,e.clientX,e.clientY); else tip.hidden=true; };
+  $('hgrid').onmouseleave=()=>tip.hidden=true;
+  $('hgrid').onfocusin=e=>{ const el=e.target.closest('.hc'); if(el){ const r=el.getBoundingClientRect(); show(el,r.right,r.top); } };
+  $('hgrid').onfocusout=()=>tip.hidden=true;
+  $('hgrid').ontouchstart=e=>{ const el=e.target.closest('.hc'); if(el){ const t=e.touches[0]; show(el,t.clientX,t.clientY); } };
+}
+
+function positions(H){
+  const rows=POS.map(p=>{ const a=H.filter(h=>h.p===p); return {p,n:a.length,v:a.filter(h=>h.v).length,r:a.filter(h=>h.r).length,bb:a.reduce((s,h)=>s+h.bb,0)}; }).filter(x=>x.n);
+  $('tpos').innerHTML=`<thead><tr><th>Позиция</th><th>Раздач</th><th>Вход</th><th>Рейз</th><th>Итог, ББ</th><th>ББ/100</th></tr></thead><tbody>${rows.map(x=>`<tr><td class="txt">${POS_RU[x.p]}</td><td>${x.n}</td><td>${pct(x.v/x.n)}</td><td>${pct(x.r/x.n)}</td><td class="${x.bb>0?'pos':x.bb<0?'neg':''}">${sgn(x.bb)}</td><td>${sgn(x.bb/x.n*100,0)}</td></tr>`).join('')}</tbody>`;
+}
+
+function chart(H){
+  const box=$('chart'); if(H.length<2){ box.innerHTML='<div class="empty">Нужно хотя бы две раздачи.</div>'; return; }
+  let cum=0; const pts=H.map(h=>cum+=h.bb);
+  const W=560,Hh=220,pl=46,pr=10,pt=10,pb=24;
+  const mn=Math.min(0,...pts), mx=Math.max(0,...pts), span=(mx-mn)||1;
+  const x=i=>pl+(W-pl-pr)*i/(pts.length-1), y=v=>pt+(Hh-pt-pb)*(1-(v-mn)/span);
+  const step=niceStep(span/4); const ticks=[]; for(let t=Math.ceil(mn/step)*step;t<=mx+1e-9;t+=step) ticks.push(t);
+  const last=pts[pts.length-1], col=css(last>=0?'--pos':'--neg');
+  const d=pts.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Накопленный результат: ${sgn(last)} ББ за ${pts.length} раздач">
+    ${ticks.map(t=>`<line class="${Math.abs(t)<1e-9?'zero':'gl'}" x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}"/><text class="ax" x="${pl-6}" y="${y(t)+4}" text-anchor="end">${Math.round(t)}</text>`).join('')}
+    <text class="ax" x="${pl}" y="${Hh-6}">1</text><text class="ax" x="${W-pr}" y="${Hh-6}" text-anchor="end">${pts.length}</text>
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${x(pts.length-1)}" cy="${y(last)}" r="4" fill="${col}" stroke="${css('--surface')}" stroke-width="2"/>
+    <line id="cx" y1="${pt}" y2="${Hh-pb}" stroke="${css('--muted')}" stroke-dasharray="3 3" visibility="hidden"/>
+    <circle id="cd" r="4" fill="${col}" stroke="${css('--surface')}" stroke-width="2" visibility="hidden"/>
+    <rect x="${pl}" y="0" width="${W-pl-pr}" height="${Hh}" fill="transparent" id="chit"/></svg>`;
+  $('chNote').textContent=`Накопленный выигрыш в больших блайндах: ${sgn(last)} ББ за ${pts.length} раздач.`;
+  const svg=box.querySelector('svg'), tip=$('tip');
+  const mv=(cx,cy)=>{ const r=svg.getBoundingClientRect(); const sx=(cx-r.left)/r.width*W; const i=Math.max(0,Math.min(pts.length-1,Math.round((sx-pl)/(W-pl-pr)*(pts.length-1))));
+    ['cx','cd'].forEach(id=>svg.getElementById(id).setAttribute('visibility','visible'));
+    svg.getElementById('cx').setAttribute('x1',x(i)); svg.getElementById('cx').setAttribute('x2',x(i)); svg.getElementById('cd').setAttribute('cx',x(i)); svg.getElementById('cd').setAttribute('cy',y(pts[i]));
+    const h=H[i]; tip.innerHTML=`Раздача ${i+1} · ${h.c}, ${POS_RU[h.p]||h.p}<br>в раздаче ${sgn(h.bb)} ББ · всего ${sgn(pts[i])} ББ`; tip.hidden=false;
+    const tr=tip.getBoundingClientRect(); tip.style.left=Math.min(innerWidth-tr.width-8,Math.max(8,cx+12))+'px'; tip.style.top=Math.max(8,cy-tr.height-12)+'px'; };
+  const hit=svg.getElementById('chit');
+  hit.onmousemove=e=>mv(e.clientX,e.clientY); hit.ontouchmove=e=>{ const t=e.touches[0]; mv(t.clientX,t.clientY); };
+  hit.onmouseleave=()=>{ tip.hidden=true; ['cx','cd'].forEach(id=>svg.getElementById(id).setAttribute('visibility','hidden')); };
+}
+function niceStep(raw){ const p=10**Math.floor(Math.log10(raw||1)), f=raw/p; return (f<=1?1:f<=2?2:f<=5?5:10)*p; }
+
+function spark(arr){ if(!arr||arr.length<2) return ''; const W=120,H=28,mx=Math.max(...arr),mn=0; const d=arr.map((v,i)=>`${i?'L':'M'}${(i/(arr.length-1)*W).toFixed(1)},${(H-2-(v-mn)/(mx-mn||1)*(H-4)).toFixed(1)}`).join('');
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true" style="vertical-align:middle"><path d="${d}" fill="none" stroke="${css('--seq')}" stroke-width="1.5"/></svg>`; }
+function tours(){
+  const T=D.sessions.filter(s=>s.mode==='tour'); $('toursCard').hidden=mode==='c'||!T.length;
+  const hand=id=>D.hands.filter(h=>h.s===id);
+  $('ttours').innerHTML=`<thead><tr><th>Дата</th><th>Место</th><th>Раздач</th><th>Блайнды</th><th>Ошибок</th><th>Стек, ББ</th></tr></thead><tbody>${T.map(s=>{ const hs=hand(s.id), bad=hs.reduce((a,h)=>a+h.g[2],0);
+    return `<tr><td class="txt">${fmtDT(s.start)}</td><td><b>${s.place?(s.place===1?'1 — победа':s.place):'не доигран'}</b></td><td>${s.hands}</td><td class="txt">каждые ${s.every||10}, ур. ${s.level||1}</td><td>${bad}</td><td>${spark(s.stack)}</td></tr>`; }).join('')}</tbody>`;
+}
+function cash(){
+  const C=D.sessions.filter(s=>s.mode!=='tour'); $('cashCard').hidden=mode==='t'||!C.length;
+  $('tcash').innerHTML=`<thead><tr><th>Дата</th><th>Стол</th><th>Раздач</th><th>Итог, ББ</th><th>ББ/100</th><th>Докупов</th></tr></thead><tbody>${C.map(s=>`<tr><td class="txt">${fmtDT(s.start)}</td><td class="txt">${s.table==='tough'?'сильные':'новички'}</td><td>${s.hands}</td><td class="${s.bb>0?'pos':s.bb<0?'neg':''}">${sgn(s.bb)}</td><td>${s.hands?sgn(s.bb/s.hands*100,0):'—'}</td><td>${Math.max(0,(s.buyins||1)-1)}</td></tr>`).join('')}</tbody>`;
+}
+function recent(){
+  const M=D.mistakes.slice(0,40);
+  $('mlist').innerHTML=M.length?M.map(m=>`<div class="mi"><div class="h">${fmtDT(m.t)} · ${m.c} · ${m.st}${m.p?' · '+(POS_RU[m.p]||m.p):''}</div><div>${m.x}</div></div>`).join(''):'<div class="empty">Ошибок пока нет.</div>';
+}
+function histTxt(){ try{ return (JSON.parse(localStorage.getItem('flop_hist')||'[]')).join('\n\n\n'); }catch(e){ return ''; } }
+function hist(){ let n=0; try{ n=JSON.parse(localStorage.getItem('flop_hist')||'[]').length; }catch(e){} $('histNote').textContent=n?`Сохранено ${n} раздач.`:'История пока пуста.'; }
+
+$('segMode').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.v; try{localStorage.setItem('st_mode',mode);}catch(_){} render(); };
+$('segMap').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; mapMode=b.dataset.v; try{localStorage.setItem('st_map',mapMode);}catch(_){} render(); };
+$('bDl').onclick=()=>{ const t=histTxt(); if(!t) return; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'})); a.download='flop-hands.txt'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
+$('bCopy').onclick=async e=>{ const t=histTxt(); try{ await navigator.clipboard.writeText(t); e.target.textContent='Скопировано'; setTimeout(()=>e.target.textContent='Скопировать',1600); }catch(_){ e.target.textContent='Не удалось'; } };
+$('bReset').onclick=()=>{ if(!confirm('Удалить всю статистику, ошибки и историю раздач в этом браузере?')) return; try{ ['flop_stats','flop_hist','pt_mtypes','pt_tours','pt_cur'].forEach(k=>localStorage.removeItem(k)); }catch(_){} D={v:1,hands:[],sessions:[],mistakes:[]}; render(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{render();streakCard();});
+const FL='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2c.6 3.2-1 5-2.6 6.8C8 10.4 6.5 12 6.5 14.8A5.5 5.5 0 0 0 12 20.3a5.5 5.5 0 0 0 5.5-5.5c0-2.3-1-4.1-2.2-5.4-.2 1.4-.9 2.5-2 3 .5-3.3-.1-7.2-1.3-10.4z"/></svg>';
+function streakCard(){
+  if(!window.Flop){ setTimeout(streakCard,50); return; }
+  const I=Flop.info(), P=Flop.plural, t=Flop.today();
+  document.querySelectorAll('#goalsel button').forEach(b=>{ b.setAttribute('aria-pressed',+b.dataset.g===I.goal); b.onclick=()=>{ Flop.setGoal(+b.dataset.g); streakCard(); }; });
+  const surf=css('--surface'), hot='#ea580c';
+  // calendar: 16 weeks, Monday-first columns
+  const now=new Date(); const dow=(now.getDay()+6)%7; let start=Flop.shift(t,-(dow+7*15));
+  let cal='';
+  for(let w=0;w<16;w++){ cal+='<div class="wk">'; for(let d=0;d<7;d++){ const k=Flop.shift(start,w*7+d); const v=Flop.total(I.data[k]); const fut=k>t;
+      const bg=v?mix(mix(surf,hot,.18),hot,Math.min(1,v/I.goal)):'';
+      cal+=`<div class="d${fut?' x':''}${v>=I.goal?' f':''}" title="${new Date(k).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}: ${v} ${P(v,['очко','очка','очков'])}"${bg?` style="background:${bg}"`:''}></div>`; }
+    cal+='</div>'; }
+  const left=Math.max(0,I.goal-I.today);
+  $('streakc').innerHTML=`<div class="sbig${I.streak?'':' off'}">${FL}<div><b>${I.streak}</b><span>${P(I.streak,['день','дня','дней'])} подряд · лучшая серия ${I.best}</span></div></div>
+    <div class="sprog"><div class="srow"><span>Сегодня: <b>${I.today}</b> из ${I.goal}</span><span>${I.doneToday?'Цель дня выполнена ✓':`осталось ${left} — <a href="pushfold.html">пуш/фолд</a>, <a href="outs.html">ауты</a> или <a href="play.html">стол</a>`}</span></div><div class="sbar"><i style="width:${Math.min(100,I.today/I.goal*100)}%"></i></div></div>
+    <div class="cal" aria-label="Активность за 16 недель">${cal}</div>
+    <div class="calleg"><span>меньше</span><span class="d" style="background:${mix(mix(surf,hot,.18),hot,.2)}"></span><span class="d" style="background:${mix(mix(surf,hot,.18),hot,.6)}"></span><span class="d" style="background:${hot}"></span><span>больше</span><span style="margin-left:8px"><span class="d" style="background:${hot};outline:2px solid ${css('--ink')};outline-offset:-2px"></span> цель выполнена</span></div>`;
+}
+streakCard();
+
+render();
+</script>
+<script src="site.js" defer></script>
+</body>
+</html>

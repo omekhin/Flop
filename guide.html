@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шпаргалка по покеру — Флоп</title>
+<meta name="description" content="Шпаргалка по техасскому холдему: позиции, с какими руками входить, размер рейза, игра по стеку в больших блайндах, олл-ин/фолд, шансы и ауты, термины.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Флоп">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Шпаргалка по покеру — Флоп">
+<meta property="og:description" content="Шпаргалка по техасскому холдему: позиции, с какими руками входить, размер рейза, игра по стеку в больших блайндах, олл-ин/фолд, шансы и ауты, термины.">
+<meta property="og:url" content="https://poker-trener.ru/guide.html">
+<meta property="og:image" content="https://poker-trener.ru/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f6a4c">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Флоп">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* Layout: nav, title + jump links, then stacked reference cards: positions, opening ranges, sizing, stack depth, push/fold, odds, hand ranking, glossary. */
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --ink:#141a17; --ink2:#47524d; --muted:#6f7a75; --line:#d9dfdb; --grid:#e8ece9;
+  --felt:#1f6a4c; --felt-edge:#174f39; --felt-ink:#e9f4ee; --rail:#3a2f27;
+  --accent:#1f6a4c; --accent-ink:#ffffff; --shove:#d9480f;
+  --ep:#2a78d6; --mp:#1f6a4c; --late:#b07400; --blind:#7a8580; --card:#ffffff;
+  --display:"Unbounded","Onest",system-ui,sans-serif; --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --shove:#ff8a4c; --ep:#5598e7; --mp:#47b383; --late:#e0a63a; --blind:#8d9893; --card:#f4f4f1; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --shove:#ff8a4c; --ep:#5598e7; --mp:#47b383; --late:#e0a63a; --blind:#8d9893; --card:#f4f4f1; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+html{scroll-behavior:smooth;scroll-padding-top:12px}
+.app{max-width:980px;margin:0 auto;padding-block:14px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h1{font-family:var(--display);font-weight:700;font-size:24px;margin:0}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump a{font-size:13px;text-decoration:none;color:var(--ink2);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;white-space:nowrap}
+.jump a:hover{border-color:var(--muted);color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-family:var(--display);font-weight:700;font-size:19px;margin:0}
+.card h3{font-size:16px;margin:4px 0 0}
+.lead{margin:0;color:var(--ink2)}
+p{margin:0}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:center}
+.posdiag svg{width:100%;height:auto;display:block}
+.posdiag text{font-family:var(--mono);font-weight:700;font-size:13px}
+.plist{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.plist li{display:grid;grid-template-columns:14px 1fr;gap:4px 10px}
+.plist i{width:14px;height:14px;border-radius:4px;margin-top:4px}
+.plist b{display:block}
+.plist span{color:var(--ink2);font-size:14px}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);width:max-content;max-width:100%;overflow-x:auto}
+.seg button{border:0;background:none;color:var(--ink2);font:500 14px var(--body);padding:8px 13px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.rangebox{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.hgrid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px}
+.hc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;font:600 9.5px var(--mono);letter-spacing:-.04em;background:var(--grid);color:var(--muted)}
+.hc.in{background:var(--accent);color:var(--accent-ink)}
+.hc.sh{background:color-mix(in srgb,var(--shove) 75%,var(--surface));color:#fff}
+.rnote{display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink2)}
+.big{font-family:var(--mono);font-weight:700;font-size:30px;color:var(--ink);line-height:1.1}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:600;color:var(--ink2);padding:8px 10px;border-bottom:1px solid var(--line);font-size:13px}
+td{padding:9px 10px;border-bottom:1px solid var(--grid);vertical-align:top}
+td.n{font-family:var(--mono);font-weight:700;white-space:nowrap}
+.tblwrap{overflow-x:auto}
+.formula{font-family:var(--mono);font-weight:700;font-size:17px;background:var(--bg);border-radius:12px;padding:12px 14px;line-height:1.5}
+.formula small{display:block;font-family:var(--body);font-weight:400;font-size:13.5px;color:var(--ink2);margin-top:4px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.tile{background:var(--bg);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.tile b{font-family:var(--mono);font-size:20px}
+.tile span{font-size:13px;color:var(--ink2)}
+.ranks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;margin:0;padding:0;list-style:none;counter-reset:r}
+.ranks li{counter-increment:r;display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--grid);padding:6px 0}
+.ranks li::before{content:counter(r);font-family:var(--mono);font-weight:700;color:var(--muted)}
+.ranks .ex{font-family:var(--mono);font-size:13px;color:var(--ink2)}
+.gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px;margin:0}
+.gloss div{padding:8px 0;border-bottom:1px solid var(--grid)}
+.gloss dt{font-weight:700;display:inline}
+.gloss dd{display:inline;margin:0;color:var(--ink2)}
+.gloss dd::before{content:" — "}
+.cta{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;font:600 14px var(--body);text-decoration:none}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+@media (max-width:760px){
+  .two,.rangebox{grid-template-columns:minmax(0,1fr)}
+  .grid3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .ranks,.gloss{grid-template-columns:minmax(0,1fr)}
+  h1{font-size:20px}.card{padding:14px 12px}
+  .jump{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.jump::-webkit-scrollbar{display:none}
+  .hc{font-size:7px}.hgrid{gap:1.5px}
+}
+/* combos */
+.su-s{color:#1a1a1a}.su-h{color:#cf2f2f}.su-d{color:#2d64c8}.su-c{color:#1c8a3e}
+.combos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.cb{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--grid)}
+.cb .cs{display:flex;gap:2px;grid-row:span 2}
+.cb .k{width:22px;height:30px;border-radius:4px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 10.5px/1 var(--mono)}
+.cb .k.dim{opacity:.35}
+.cb > b{font-size:14px}
+.cb > span{font-size:12px;color:var(--ink2)}
+@media (max-width:760px){.combos{grid-template-columns:minmax(0,1fr)}}
+</style>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<div class="app">
+  <nav class="sitenav" aria-label="Разделы"><a class="brand" href="./">Флоп</a><a href="play.html">Стол с тренером</a><a href="pushfold.html">Пуш/фолд</a><a href="calc.html">Калькулятор</a><a href="outs.html">Ауты</a><a href="guide.html" aria-current="page">Шпаргалка</a><a href="stats.html">Статистика</a></nav>
+  <h1>Шпаргалка</h1>
+  <div class="jump"><a href="#pos">Позиции</a><a href="#open">С чем входить</a><a href="#size">Размер ставки</a><a href="#stack">Игра по стеку</a><a href="#push">Олл-ин/фолд</a><a href="#odds">Шансы и ауты</a><a href="#ranks">Комбинации</a><a href="#terms">Термины</a></div>
+
+  <section class="card" id="pos">
+    <h2>Позиции за столом</h2>
+    <p class="lead">Чем позже ты действуешь, тем больше знаешь о соперниках и тем шире можно играть. Баттон — лучшее место за столом, блайнды — худшее.</p>
+    <div class="two">
+      <div class="posdiag" id="posdiag"></div>
+      <ul class="plist">
+        <li><i style="background:var(--ep)"></i><div><b>Ранние: UTG, UTG+1</b><span>Ходишь первым, за тобой 8 игроков. Входи только с сильными руками — около 10–12%.</span></div></li>
+        <li><i style="background:var(--mp)"></i><div><b>Средние: MP, LJ</b><span>Чуть шире: добавляются средние пары, одномастные тузы и картинки — около 15–18%.</span></div></li>
+        <li><i style="background:var(--late)"></i><div><b>Поздние: HJ, CO, баттон</b><span>За тобой мало игроков, после флопа ходишь последним. С баттона можно открывать до 40% рук.</span></div></li>
+        <li><i style="background:var(--blind)"></i><div><b>Блайнды: МБ, ББ</b><span>Платишь вслепую и после флопа ходишь первым. Защищай ББ против мелких рейзов, но не влюбляйся в слабые руки.</span></div></li>
+      </ul>
+    </div>
+    <p class="lead">Когда за столом меньше 9 игроков, исчезают ранние позиции. На 6 игроков первым ходит уже LJ, а диапазоны всех позиций расширяются.</p>
+  </section>
+
+  <section class="card" id="open">
+    <h2>С чем входить первым</h2>
+    <p class="lead">Если до тебя все сбросили, входи рейзом или сбрасывай. Без лимпов: лимп пускает в банк всех задёшево.</p>
+    <div class="seg" id="segOpen" role="group" aria-label="Позиция"><button type="button" data-v="EP" aria-pressed="true">UTG, UTG+1</button><button type="button" data-v="MP" aria-pressed="false">MP, LJ</button><button type="button" data-v="LATE" aria-pressed="false">HJ, CO</button><button type="button" data-v="BTN" aria-pressed="false">Баттон</button><button type="button" data-v="SBSTEAL" aria-pressed="false">МБ</button></div>
+    <div class="rangebox">
+      <div class="hgrid" id="gOpen" role="img"></div>
+      <div class="rnote"><div><span class="big" id="openPct"></span> рук</div><div id="openTxt"></div><div>Над диагональю — одномастные руки (s), под ней — разномастные (o), по диагонали — пары.</div></div>
+    </div>
+  </section>
+
+  <section class="card" id="size">
+    <h2>Размер ставки</h2>
+    <div class="formula">Рейз = 3 ББ + 1 ББ за каждого лимпера<small>Без позиции (с блайндов) — ещё +1 ББ. Пример: блайнды 100/200, два лимпера, ты на CO → 3×200 + 2×200 = 1 000.</small></div>
+    <div class="formula">3-бет = рейз соперника × 3 в позиции, × 3,5–4 без позиции<small>Против рейза до 600 в позиции 3-бет до 1 800, с блайндов — до 2 100–2 400.</small></div>
+    <div class="formula">Ставка после флопа: ½–⅔ банка<small>Сухая доска (K-7-2 разной масти) — ⅓–½. Мокрая доска с дро — ⅔–¾, чтобы дро платили дорого.</small></div>
+    <h3>Против рейза</h3>
+    <div class="tblwrap"><table><thead><tr><th>Рейз пришёл из</th><th>3-бет</th><th>Колл</th></tr></thead><tbody>
+      <tr><td>Ранних позиций</td><td class="n">QQ+, AK</td><td>JJ–22 (ради сета), AQs</td></tr>
+      <tr><td>Поздних позиций</td><td class="n">JJ+, AQ+</td><td>TT–22, AJs, ATs, KQs, KJs, QJs, JTs, T9s, AQo</td></tr>
+      <tr><td>Против 3-бета</td><td class="n">QQ+, AK — 4-бет или олл-ин</td><td>Остальное почти всегда фолд</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="card" id="stack">
+    <h2>Игра по стеку в больших блайндах</h2>
+    <p class="lead">Считай стек не в фишках, а в ББ: стек ÷ большой блайнд. От этого числа зависит вся стратегия.</p>
+    <div class="tblwrap"><table><thead><tr><th>Стек</th><th>Как играть</th></tr></thead><tbody>
+      <tr><td class="n">40+ ББ</td><td>Обычная игра: открывай рейзом по таблице, играй спекулятивные руки (маленькие пары, одномастные коннекторы) — они окупаются, когда собирают сет или стрит.</td></tr>
+      <tr><td class="n">20–40 ББ</td><td>Меньше спекулятивных рук. Против рейза с сильной рукой — 3-бет, часто сразу олл-ин. Рейз поменьше: 2–2,5 ББ.</td></tr>
+      <tr><td class="n">15–20 ББ</td><td>Рейз или олл-ин, колл почти исчезает. Если поставил больше трети стека — уже не сбрасывай.</td></tr>
+      <tr><td class="n">до 15 ББ</td><td>Только олл-ин или фолд — по таблице ниже. Мин-рейз и лимп здесь ошибка: ты отдаёшь фишки и всё равно не сможешь сбросить.</td></tr>
+      <tr><td class="n">до 6 ББ</td><td>Олл-ин очень широко с любой позиции, где до тебя все сбросили. Ждать нельзя: каждый круг блайндов отнимает 1,5 ББ.</td></tr>
+    </tbody></table></div>
+    <p class="lead">Ближе к призовым местам (ICM) коллируй олл-ины осторожнее: вылет стоит дороже, чем удвоение. Пушить при этом можно смелее.</p>
+  </section>
+
+  <section class="card" id="push">
+    <h2>Таблица олл-ин/фолд</h2>
+    <p class="lead">Если до тебя все сбросили, а у тебя 15 ББ или меньше — олл-ин с руками из таблицы, остальное фолд.</p>
+    <div class="seg" id="segPS" role="group" aria-label="Стек"><button type="button" data-v="b15" aria-pressed="true">10–15 ББ</button><button type="button" data-v="b10" aria-pressed="false">6–10 ББ</button><button type="button" data-v="b5" aria-pressed="false">до 6 ББ</button></div>
+    <div class="seg" id="segPG" role="group" aria-label="Позиция"><button type="button" data-v="EP" aria-pressed="true">UTG, UTG+1</button><button type="button" data-v="MP" aria-pressed="false">MP, LJ</button><button type="button" data-v="LATE" aria-pressed="false">HJ, CO</button><button type="button" data-v="BTN" aria-pressed="false">Баттон, МБ</button></div>
+    <div class="rangebox">
+      <div class="hgrid" id="gPush" role="img"></div>
+      <div class="rnote"><div><span class="big" id="pushPct"></span> рук</div>
+        <div><b>Колл чужого олл-ина</b> нужен руки сильнее: на 10–15 ББ — 99+, AQ+; на 6–10 ББ — 66+, AT+, KQs. Точнее — считай шансы банка (ниже).</div>
+        <div class="cta"><a class="btn primary" href="pushfold.html">Потренировать пуш/фолд →</a></div></div>
+    </div>
+  </section>
+
+  <section class="card" id="odds">
+    <h2>Шансы и ауты</h2>
+    <div class="formula">Нужное эквити = колл ÷ (банк + ставка + колл)<small>Банк 1 000, соперник ставит 500. Колл 500 ÷ (1 000 + 500 + 500) = 25%. Если шанс выиграть больше 25% — колл окупается.</small></div>
+    <div class="formula">Правило 2 и 4: ауты × 2 = % на одну карту, ауты × 4 = % на две<small>Флеш-дро на флопе: 9 аутов → ~36% до ривера, если олл-ин; ~18% на тёрн, если впереди ещё ставка.</small></div>
+    <h3>Сколько нужно эквити против ставки</h3>
+    <div class="grid3">
+      <div class="tile"><b>20%</b><span>ставка ⅓ банка</span></div>
+      <div class="tile"><b>25%</b><span>ставка ½ банка</span></div>
+      <div class="tile"><b>29%</b><span>ставка ⅔ банка</span></div>
+      <div class="tile"><b>30%</b><span>ставка ¾ банка</span></div>
+      <div class="tile"><b>33%</b><span>ставка в банк</span></div>
+      <div class="tile"><b>40%</b><span>ставка 2 банка</span></div>
+    </div>
+    <h3>Частые дро</h3>
+    <div class="tblwrap"><table><thead><tr><th>Дро</th><th>Аутов</th><th>На тёрн</th><th>До ривера</th></tr></thead><tbody>
+      <tr><td>Флеш-дро + стрит-дро</td><td class="n">15</td><td class="n">32%</td><td class="n">54%</td></tr>
+      <tr><td>Флеш-дро + две оверкарты</td><td class="n">15</td><td class="n">32%</td><td class="n">54%</td></tr>
+      <tr><td>Флеш-дро</td><td class="n">9</td><td class="n">19%</td><td class="n">35%</td></tr>
+      <tr><td>Двусторонний стрит-дро</td><td class="n">8</td><td class="n">17%</td><td class="n">31%</td></tr>
+      <tr><td>Две оверкарты</td><td class="n">6</td><td class="n">13%</td><td class="n">24%</td></tr>
+      <tr><td>Гатшот (стрит в середину)</td><td class="n">4</td><td class="n">9%</td><td class="n">17%</td></tr>
+      <tr><td>Пара → сет</td><td class="n">2</td><td class="n">4%</td><td class="n">8%</td></tr>
+    </tbody></table></div>
+    <p class="lead">Против сильной руки уценивай ауты: флешевая карта, спаривающая доску, может дать сопернику фулл-хаус, а твоя оверкарта ничего не даст против сета. <a href="outs.html">Тренажёр аутов →</a></p>
+    <h3>Пары до флопа</h3>
+    <div class="grid3">
+      <div class="tile"><b>~12%</b><span>собрать сет на флопе с карманной парой</span></div>
+      <div class="tile"><b>~55 / 45</b><span>пара против двух старших карт (QQ против AK)</span></div>
+      <div class="tile"><b>~80 / 20</b><span>старшая пара против младшей (KK против QQ)</span></div>
+    </div>
+  </section>
+
+  <section class="card" id="ranks">
+    <h2>Старшинство комбинаций</h2>
+    <p class="lead">Комбинация — лучшие 5 карт из 7: две твои и пять на столе. Тусклые карты в примерах — кикеры, они решают только при равной комбинации. Проценты — как часто комбинация собирается к риверу.</p>
+    <div class="combos" id="combosList"></div>
+    <div class="cta"><a class="btn primary" href="calc.html">Калькулятор шансов →</a></div>
+  </section>
+
+  <section class="card" id="terms">
+    <h2>Термины</h2>
+    <dl class="gloss">
+      <div><dt>ББ / МБ</dt><dd>большой и малый блайнд — обязательные ставки до раздачи.</dd></div>
+      <div><dt>Лимп</dt><dd>вход в банк коллом большого блайнда без рейза. Почти всегда хуже рейза или фолда.</dd></div>
+      <div><dt>Рейз / опен</dt><dd>первое повышение до флопа.</dd></div>
+      <div><dt>3-бет, 4-бет</dt><dd>повторное повышение после рейза и повышение после 3-бета.</dd></div>
+      <div><dt>Олл-ин, пуш</dt><dd>ставка всеми фишками.</dd></div>
+      <div><dt>Стек</dt><dd>твои фишки; эффективный стек — меньший из стеков двух игроков в банке.</dd></div>
+      <div><dt>Диапазон</dt><dd>набор рук, с которыми игрок мог так сыграть.</dd></div>
+      <div><dt>Эквити</dt><dd>доля банка, которую рука выигрывает в среднем против рук соперника.</dd></div>
+      <div><dt>Шансы банка</dt><dd>сколько нужно платить относительно размера банка; переводятся в нужное эквити.</dd></div>
+      <div><dt>Ауты</dt><dd>карты колоды, которые улучшат твою руку до выигрышной.</dd></div>
+      <div><dt>Дро</dt><dd>недособранная рука: флеш-дро, стрит-дро.</dd></div>
+      <div><dt>Гатшот</dt><dd>стрит-дро, которому нужна одна карта в середину (4 аута).</dd></div>
+      <div><dt>Сет / трипс</dt><dd>три одинаковые карты; сет — когда пара была на руках.</dd></div>
+      <div><dt>Оверпара</dt><dd>карманная пара старше всех карт на столе.</dd></div>
+      <div><dt>Топ-пара, кикер</dt><dd>пара со старшей картой стола; кикер — вторая карта, решает при равных парах.</dd></div>
+      <div><dt>Вэлью-бет</dt><dd>ставка сильной рукой, чтобы заплатили руки слабее.</dd></div>
+      <div><dt>Блеф</dt><dd>ставка слабой рукой, чтобы сбросили руки сильнее.</dd></div>
+      <div><dt>Контбет</dt><dd>ставка на флопе тем, кто рейзил до флопа.</dd></div>
+      <div><dt>Позиция</dt><dd>ходить последним после флопа — «быть в позиции».</dd></div>
+      <div><dt>VPIP</dt><dd>как часто вкладываешь деньги в банк добровольно. Норма 20–25%.</dd></div>
+      <div><dt>PFR</dt><dd>как часто рейзишь до флопа. Хорошо, когда близко к VPIP.</dd></div>
+      <div><dt>Колл-станция</dt><dd>игрок, который много коллирует и редко сбрасывает. Против него — больше вэлью, меньше блефов.</dd></div>
+      <div><dt>Тайтовый / лузовый</dt><dd>играет мало рук / много рук.</dd></div>
+      <div><dt>ICM</dt><dd>модель ценности фишек у призовых мест: потерять фишки дороже, чем выиграть столько же.</dd></div>
+      <div><dt>Баббл</dt><dd>момент перед призовыми местами, когда вылет особенно обиден.</dd></div>
+      <div><dt>Тилт</dt><dd>игра на эмоциях после проигрыша. Лучшее лекарство — перерыв.</dd></div>
+    </dl>
+  </section>
+</div>
+<script src="ranges.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const ALL=[]; for(let i=0;i<13;i++) for(let j=0;j<13;j++){ const a=ORD[i],b=ORD[j]; ALL.push(i===j?a+a:i<j?a+b+'s':b+a+'o'); }
+const share=set=>{ let n=0; set.forEach(c=>n+=c.length===2?6:c[2]==='s'?4:12); return Math.round(n/1326*100)+'%'; };
+function grid(el,set,cls){ el.innerHTML=ALL.map(c=>`<div class="hc${set.has(c)?' '+cls:''}">${c}</div>`).join(''); el.setAttribute('aria-label',`Диапазон: ${[...set].join(', ')}`); }
+const OPEN_TXT={EP:'Пары от 66, AJ+ и KQ, одномастные AT+, KJ+, QJ, JT.',MP:'Добавляются пары от 44, A8s+, KTs+, QTs+, T9s, AT+, KJ+.',LATE:'Все пары, любой одномастный туз, K9s+, Q9s+, J9s+, коннекторы до 76s, A9o+, KTo+, QTo+, JTo.',BTN:'Почти половина колоды: все пары, все тузы с A5o, одномастные короли от K5s, коннекторы до 65s.',SBSTEAL:'Если до тебя все сбросили, а остался только ББ — атакуй широко: рейз 3 ББ.'};
+let openG='EP', ps='b15', pg='EP';
+function seg(id,cur,fn){ const el=$(id); el.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===cur)); el.onclick=e=>{ const b=e.target.closest('button'); if(b) fn(b.dataset.v); }; }
+function drawOpen(){ grid($('gOpen'),RNG[openG],'in'); $('openPct').textContent=share(RNG[openG]); $('openTxt').textContent=OPEN_TXT[openG]; seg('segOpen',openG,v=>{openG=v;drawOpen();}); }
+function drawPush(){ const set=PUSH[ps][pg]; grid($('gPush'),set,'sh'); $('pushPct').textContent=share(set); seg('segPS',ps,v=>{ps=v;drawPush();}); seg('segPG',pg,v=>{pg=v;drawPush();}); }
+function posDiag(){
+  const P=[['BTN','late'],['SB','blind'],['BB','blind'],['UTG','ep'],['UTG+1','ep'],['MP','mp'],['LJ','mp'],['HJ','late'],['CO','late']];
+  let s=`<svg viewBox="0 0 420 260" role="img" aria-label="Стол на 9 игроков: ранние позиции после блайндов, поздние перед баттоном"><ellipse cx="210" cy="130" rx="170" ry="92" fill="var(--felt)" stroke="var(--rail)" stroke-width="10"/>
+  <text x="210" y="122" text-anchor="middle" style="fill:var(--felt-ink);font:600 13px var(--body)">порядок хода до флопа</text><text x="210" y="142" text-anchor="middle" style="fill:var(--felt-ink);font:600 13px var(--body);opacity:.8">UTG → … → баттон → МБ → ББ</text>`;
+  P.forEach(([n,g],i)=>{ const a=Math.PI/2+(i)*2*Math.PI/9; const x=210+178*Math.cos(a), y=130+104*Math.sin(a);
+    s+=`<rect x="${x-30}" y="${y-14}" width="60" height="28" rx="14" fill="var(--${g==='blind'?'blind':g})"/><text x="${x}" y="${y+5}" text-anchor="middle" style="fill:#fff">${n}</text>`; });
+  s+=`<circle cx="${210+140*Math.cos(Math.PI/2)+26}" cy="${130+76}" r="10" fill="#fff" stroke="#111"/><text x="${210+26}" y="${130+80}" text-anchor="middle" style="fill:#111;font-size:11px">D</text></svg>`;
+  $('posdiag').innerHTML=s;
+}
+posDiag(); drawOpen(); drawPush();
+function cardInner(c){ const s=SUITS[c&3], r=RANKS[c>>2]; return `<span class="r su-${s}">${r==='T'?'10':r}</span><span class="s su-${s}">${SUIT_SYM[s]}</span>`; }
+const C=(r,s)=>RANKS.indexOf(r)*4+SUITS.indexOf(s);
+const COMBOS=[
+  ['Роял-флеш','A K Q J 10 одной масти','~0,003%',[['A','h'],['K','h'],['Q','h'],['J','h'],['T','h']]],
+  ['Стрит-флеш','пять подряд одной масти','~0,03%',[['9','s'],['8','s'],['7','s'],['6','s'],['5','s']]],
+  ['Каре','четыре одинаковые','~0,17%',[['7','c'],['7','d'],['7','h'],['7','s'],['K','d',1]]],
+  ['Фулл-хаус','тройка + пара','~2,6%',[['K','s'],['K','h'],['K','d'],['4','c'],['4','s']]],
+  ['Флеш','пять одной масти','~3%',[['A','d'],['J','d'],['8','d'],['6','d'],['2','d']]],
+  ['Стрит','пять подряд, масть любая','~4,6%',[['T','c'],['9','d'],['8','h'],['7','s'],['6','c']]],
+  ['Сет / трипс','три одинаковые','~4,8%',[['Q','c'],['Q','d'],['Q','s'],['9','h',1],['4','c',1]]],
+  ['Две пары','две пары','~23%',[['J','h'],['J','c'],['8','s'],['8','d'],['A','c',1]]],
+  ['Пара','две одинаковые','~44%',[['A','s'],['A','d'],['K','c',1],['7','h',1],['3','s',1]]],
+  ['Старшая карта','ничего не собрано','~17%',[['A','c'],['K','d',1],['9','h',1],['6','s',1],['3','c',1]]],
+];
+$('combosList').innerHTML=COMBOS.map(([n,d,p,cs],i)=>`<div class="cb"><div class="cs">${cs.map(([r,s,dim])=>{ const c=C(r,s); return `<span class="k${dim?' dim':''}">${cardInner(c)}</span>`; }).join('')}</div><b>${i+1}. ${n}</b><span>${d} · за 7 карт ${p}</span></div>`).join('');
+
+
+</script>
+<script src="site.js" defer></script>
+</body>
+</html>

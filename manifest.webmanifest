@@ -1,0 +1,20 @@
+{
+  "name": "Флоп — покерный тренажёр",
+  "short_name": "Флоп",
+  "description": "Покерный тренажёр с тренером: стол на 9 игроков, пуш/фолд, ауты, шпаргалка.",
+  "lang": "ru",
+  "start_url": "./play.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef1ef",
+  "theme_color": "#1f6a4c",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Стол с тренером", "url": "./play.html"},
+    {"name": "Пуш/фолд", "url": "./pushfold.html"},
+    {"name": "Шпаргалка", "url": "./guide.html"}
+  ]
+}

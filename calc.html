@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Калькулятор шансов в покере — Флоп</title>
+<meta name="description" content="Покерный калькулятор: шансы руки против руки на префлопе, флопе, тёрне и ривере. До 4 рук, случайная рука соперника, ауты и комбинации.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Флоп">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:title" content="Калькулятор шансов в покере — Флоп">
+<meta property="og:description" content="Шансы руки против руки на префлопе, флопе, тёрне и ривере. До 4 рук, ауты и комбинации.">
+<meta property="og:url" content="https://poker-trener.ru/calc.html">
+<meta property="og:image" content="https://poker-trener.ru/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1f6a4c">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-title" content="Флоп">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* Layout: nav, title, then two columns: left = hands + board slots and the card deck picker; right = results by street, current hands, outs. Phone: single column, deck under the slots. */
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --ink:#141a17; --ink2:#47524d; --muted:#6f7a75; --line:#d9dfdb; --grid:#e8ece9;
+  --felt:#1f6a4c; --felt-edge:#174f39; --felt-ink:#e9f4ee; --rail:#3a2f27;
+  --accent:#1f6a4c; --accent-ink:#ffffff; --good:#1d7a4a; --bad:#cc3f37;
+  --card:#ffffff; --c-s:#1a1a1a; --c-h:#cf2f2f; --c-d:#2d64c8; --c-c:#1c8a3e;
+  --p1:#2a78d6; --p2:#d9480f; --p3:#7c3aed; --p4:#0f8a7a;
+  --display:"Unbounded","Onest",system-ui,sans-serif; --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --good:#4cbb7f; --bad:#ec6b63; --card:#f4f4f1;
+  --p1:#5598e7; --p2:#ff8a4c; --p3:#a78bfa; --p4:#2dd4bf; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101412; --surface:#191e1c; --ink:#edf1ef; --ink2:#b4beb9; --muted:#8d9893; --line:#2b3330; --grid:#242b28;
+  --felt:#1b5a41; --felt-edge:#123c2c; --felt-ink:#e4f2ea; --rail:#2a221c;
+  --accent:#47b383; --accent-ink:#06140d; --good:#4cbb7f; --bad:#ec6b63; --card:#f4f4f1;
+  --p1:#5598e7; --p2:#ff8a4c; --p3:#a78bfa; --p4:#2dd4bf; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.app{max-width:1100px;margin:0 auto;padding-block:14px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:700;font-size:22px;margin:0}
+.sub{margin:4px 0 0;color:var(--ink2);font-size:14px}
+.main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.panel h2{font-family:var(--display);font-weight:500;font-size:17px;margin:0}
+.felt{background:radial-gradient(ellipse at 50% 30%,color-mix(in srgb,var(--felt) 85%,#fff),var(--felt) 60%,var(--felt-edge));border-radius:16px;box-shadow:inset 0 0 0 5px var(--rail);padding:14px;display:flex;flex-direction:column;gap:12px;color:var(--felt-ink)}
+.lbl{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85;display:flex;align-items:center;gap:8px}
+.lbl .dot{width:10px;height:10px;border-radius:50%}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.hands{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.hand{background:rgba(0,0,0,.18);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.slot{width:46px;height:64px;border-radius:7px;border:2px dashed rgba(255,255,255,.45);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;line-height:1;cursor:pointer;color:rgba(255,255,255,.6);font-size:20px;padding:0}
+.slot.f{background:var(--card);border:2px solid transparent;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.slot .r{font-size:21px}.slot .s{font-size:16px}
+.slot.act{outline:3px solid #ffd43b;outline-offset:2px}
+.slot.rnd{border-style:solid;border-color:rgba(255,255,255,.7);color:#fff;font-size:12px;font-family:var(--body);font-weight:700}
+.slot:focus-visible{outline:3px solid #ffd43b;outline-offset:2px}
+.mini{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:8px;padding:5px 9px;font:600 12.5px var(--body);cursor:pointer}
+.mini:hover{background:rgba(255,255,255,.26)}
+.mini.on{background:#fff;color:#123c2c}
+.su-s{color:var(--c-s)}.su-h{color:var(--c-h)}.su-d{color:var(--c-d)}.su-c{color:var(--c-c)}
+.deck{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:3px}
+.dc{aspect-ratio:5/7;border-radius:5px;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;line-height:1;cursor:pointer;padding:0;font-size:13px}
+.dc .s{font-size:11px}
+.dc:disabled{opacity:.18;cursor:default}
+.dc:not(:disabled):hover{outline:2px solid var(--accent)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:8px 12px;font:600 13.5px var(--body);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+.hint{font-size:13px;color:var(--muted)}
+/* results */
+.eqrow{display:grid;grid-template-columns:110px minmax(0,1fr) 58px;gap:10px;align-items:center}
+.eqrow .nm{font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.eqrow .nm .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.bar{height:22px;border-radius:6px;background:var(--grid);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar i.tie{background:repeating-linear-gradient(45deg,var(--muted) 0 3px,transparent 3px 6px);opacity:.5}
+.eqrow b{font-family:var(--mono);font-size:16px;text-align:right}
+.streets{display:grid;gap:4px}
+.st{display:grid;grid-template-columns:72px repeat(var(--n),minmax(0,1fr));gap:6px;align-items:center;font-size:13px}
+.st .h{font-weight:600;color:var(--ink2)}
+.st .c{font-family:var(--mono);font-weight:700;text-align:center;border-radius:7px;padding:5px 0;background:var(--bg)}
+.st .c.lead{color:#fff}
+.st.head .c{background:none;font-family:var(--body);font-weight:600;color:var(--ink2);font-size:12px}
+.st .na{color:var(--muted);font-weight:500}
+.status{font-size:12.5px;color:var(--muted);min-height:18px}
+.prog{height:3px;background:var(--grid);border-radius:2px;overflow:hidden}.prog i{display:block;height:100%;background:var(--accent);width:0}
+.made{display:flex;flex-direction:column;gap:6px}
+.made div{display:flex;gap:8px;align-items:center;font-size:14px}
+.made .dot{width:10px;height:10px;border-radius:50%}
+.outs{font-size:14px;display:flex;flex-direction:column;gap:6px}
+.lab{font-family:var(--mono);font-weight:700;background:var(--card);border-radius:4px;padding:0 3px}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.quick span{background:rgba(0,0,0,.3);border-radius:999px;padding:3px 10px;font:700 13px var(--mono);display:inline-flex;align-items:center;gap:6px}
+.quick i{width:9px;height:9px;border-radius:50%;display:inline-block}
+@media (min-width:861px){.quick{display:none}}
+.oc{display:inline-flex;font-family:var(--mono);font-weight:700;font-size:13px;background:var(--bg);border-radius:5px;padding:1px 5px;margin:2px}
+/* combos */
+.combos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
+.cb{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--grid)}
+.cb .cs{display:flex;gap:2px;grid-row:span 2}
+.cb .k{width:22px;height:30px;border-radius:4px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 10.5px/1 var(--mono)}
+.cb .k.dim{opacity:.35}
+.cb > b{font-size:14px}
+.cb > span{font-size:12px;color:var(--ink2)}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){
+  h1{font-size:19px}.sub{font-size:13px}
+  .panel{padding:12px}.felt{padding:10px;gap:10px}
+  .hands{gap:8px}.hand{padding:8px}
+  .slot{width:40px;height:56px}.slot .r{font-size:18px}.slot .s{font-size:14px}
+  .deck{gap:2px}.dc{font-size:11px;border-radius:4px}.dc .s{font-size:9px}
+  .eqrow{grid-template-columns:86px minmax(0,1fr) 52px;gap:8px}
+  .st{grid-template-columns:58px repeat(var(--n),minmax(0,1fr));font-size:12px}
+  .combos{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<div class="app">
+  <nav class="sitenav" aria-label="Разделы"><a class="brand" href="./">Флоп</a><a href="play.html">Стол с тренером</a><a href="pushfold.html">Пуш/фолд</a><a href="calc.html" aria-current="page">Калькулятор</a><a href="outs.html">Ауты</a><a href="guide.html">Шпаргалка</a><a href="stats.html">Статистика</a></nav>
+  <div><h1>Калькулятор шансов</h1><p class="sub">Выбери карты рук и стола — посчитаю, как часто выигрывает каждая рука на префлопе, флопе, тёрне и ривере.</p></div>
+  <div class="main">
+    <section class="panel">
+      <div class="felt">
+        <div class="hands" id="hands"></div>
+        <div class="row" id="handBtns"></div>
+        <div class="quick" id="quick" aria-hidden="true"></div>
+        <div><div class="lbl">Стол</div><div class="row" id="board" style="margin-top:6px"></div></div>
+      </div>
+      <div class="hint" id="pickHint">Нажми на пустую карту, потом выбери карту из колоды.</div>
+      <div class="deck" id="deck" role="group" aria-label="Колода"></div>
+      <div class="tools"><button class="btn" id="bNextCard" type="button">Следующая карта</button><button class="btn" id="bClearBoard" type="button">Очистить стол</button><button class="btn" id="bClear" type="button">Очистить всё</button></div>
+    </section>
+    <section class="panel" aria-live="polite">
+      <h2>Шансы сейчас</h2>
+      <div id="eq"></div>
+      <div class="prog"><i id="prog"></i></div>
+      <div class="status" id="status"></div>
+      <h2 style="margin-top:4px">По улицам</h2>
+      <div class="streets" id="streets"></div>
+      <div id="madeWrap" hidden><h2 style="margin:4px 0 8px">Что собрано</h2><div class="made" id="made"></div></div>
+      <div id="outsWrap" hidden><h2 style="margin:4px 0 8px">Ауты</h2><div class="outs" id="outs"></div></div>
+    </section>
+  </div>
+  <section class="panel" id="combos">
+    <h2>Комбинации — от старшей к младшей</h2>
+    <div class="combos" id="combosList"></div>
+    <p class="hint">Комбинация собирается из лучших 5 карт из 7: двух своих и пяти на столе. Если у двоих одинаковая комбинация, решают старшие карты — кикер. Масти между собой равны.</p>
+  </section>
+</div>
+<script src="ranges.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const PC=['--p1','--p2','--p3','--p4'];
+const NAMES=['Рука 1','Рука 2','Рука 3','Рука 4'];
+const pct=(x,d=1)=>(x*100).toFixed(d).replace('.',',')+'%';
+let S={hands:[[null,null],[null,null]],rnd:[false,false],board:[null,null,null,null,null],act:{t:'h',i:0,j:0}};
+try{ const x=JSON.parse(localStorage.getItem('calc_state')||'null'); if(x&&x.hands&&x.board) S={...S,...x,act:{t:'h',i:0,j:0}}; }catch(e){}
+function save(){ try{ localStorage.setItem('calc_state',JSON.stringify({hands:S.hands,rnd:S.rnd,board:S.board})); }catch(e){} }
+function cardInner(c){ const s=SUITS[c&3], r=RANKS[c>>2]; return `<span class="r su-${s}">${r==='T'?'10':r}</span><span class="s su-${s}">${SUIT_SYM[s]}</span>`; }
+function used(){ const u=new Set(); S.hands.forEach((h,i)=>{ if(!S.rnd[i]) h.forEach(c=>c!=null&&u.add(c)); }); S.board.forEach(c=>c!=null&&u.add(c)); return u; }
+const nb=()=>S.board.filter(c=>c!=null).length;
+
+/* ---------- rendering ---------- */
+function slot(c,act,label,extra=''){ return `<button type="button" class="slot${c!=null?' f':''}${act?' act':''}${extra}" aria-label="${label}">${c!=null?cardInner(c):'+'}</button>`; }
+function render(){
+  const A=S.act;
+  $('hands').innerHTML=S.hands.map((h,i)=>`<div class="hand"><div class="lbl"><span class="dot" style="background:var(${PC[i]})"></span>${NAMES[i]}${S.hands.length>2?` <button type="button" class="mini" data-del="${i}" aria-label="Убрать руку">✕</button>`:''}</div>
+    <div class="row">${S.rnd[i]?`<button type="button" class="slot rnd" data-h="${i}" data-j="0">случайная</button><button type="button" class="slot rnd" data-h="${i}" data-j="1">рука</button>`:h.map((c,j)=>slot(c,A.t==='h'&&A.i===i&&A.j===j,`${NAMES[i]}, карта ${j+1}`).replace('<button','<button data-h="'+i+'" data-j="'+j+'"')).join('')}</div>
+    <div class="row"><button type="button" class="mini${S.rnd[i]?' on':''}" data-rnd="${i}">${S.rnd[i]?'Выбрать карты':'Случайная рука'}</button></div></div>`).join('');
+  $('handBtns').innerHTML=S.hands.length<4?`<button type="button" class="mini" id="bAdd">+ ещё рука</button>`:'';
+  $('board').innerHTML=S.board.map((c,j)=>slot(c,A.t==='b'&&A.j===j,`Стол, карта ${j+1}`).replace('<button','<button data-b="'+j+'"')).join('');
+  const u=used(); let d='';
+  for(const s of [3,2,1,0]) for(let r=12;r>=0;r--){ const c=r*4+s; d+=`<button type="button" class="dc" data-c="${c}" ${u.has(c)?'disabled':''} aria-label="${RANKS[r]}${SUIT_SYM[SUITS[s]]}">${cardInner(c)}</button>`; }
+  $('deck').innerHTML=d;
+  $('pickHint').textContent=A.t?`Выбираешь: ${A.t==='h'?NAMES[A.i]+', карта '+(A.j+1):'стол, '+['1-я карта флопа','2-я карта флопа','3-я карта флопа','тёрн','ривер'][A.j]}`:'Нажми на карту, чтобы её заменить.';
+  $('bNextCard').disabled=nb()>=5; $('bNextCard').textContent=nb()<3?'Случайный флоп':nb()===3?'Случайный тёрн':'Случайный ривер';
+}
+function nextEmpty(){
+  for(let i=0;i<S.hands.length;i++) if(!S.rnd[i]) for(let j=0;j<2;j++) if(S.hands[i][j]==null) return {t:'h',i,j};
+  for(let j=0;j<5;j++) if(S.board[j]==null) return {t:'b',j};
+  return {t:null};
+}
+function setCard(c){
+  const A=S.act; if(!A.t) return;
+  if(A.t==='h') S.hands[A.i][A.j]=c; else { // keep board contiguous
+    let j=A.j; while(j>0&&S.board[j-1]==null) j--; S.board[j]=c; }
+  S.act=nextEmpty(); save(); render(); compute();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button'); if(!t) return;
+  if(t.dataset.c!=null){ setCard(+t.dataset.c); return; }
+  if(t.dataset.h!=null){ const i=+t.dataset.h,j=+t.dataset.j; if(S.rnd[i]) return; S.hands[i][j]=null; S.act={t:'h',i,j}; save(); render(); compute(); return; }
+  if(t.dataset.b!=null){ const j=+t.dataset.b; for(let k=j;k<5;k++) S.board[k]=null; S.act={t:'b',j}; save(); render(); compute(); return; }
+  if(t.dataset.rnd!=null){ const i=+t.dataset.rnd; S.rnd[i]=!S.rnd[i]; if(S.rnd[i]) S.hands[i]=[null,null]; S.act=nextEmpty(); save(); render(); compute(); return; }
+  if(t.dataset.del!=null){ const i=+t.dataset.del; S.hands.splice(i,1); S.rnd.splice(i,1); S.act=nextEmpty(); save(); render(); compute(); return; }
+  if(t.id==='bAdd'){ S.hands.push([null,null]); S.rnd.push(false); S.act=nextEmpty(); save(); render(); compute(); return; }
+});
+function randCard(){ const u=used(); let c; do{ c=(Math.random()*52)|0; }while(u.has(c)); return c; }
+$('bNextCard').onclick=()=>{ const n=nb(); const k=n<3?3:1; for(let i=0;i<k;i++){ const j=S.board.findIndex(c=>c==null); S.board[j]=randCard(); } S.act=nextEmpty(); save(); render(); compute(); };
+$('bClearBoard').onclick=()=>{ S.board=[null,null,null,null,null]; S.act=nextEmpty(); save(); render(); compute(); };
+$('bClear').onclick=()=>{ S.hands=S.hands.map(()=>[null,null]); S.rnd=S.hands.map(()=>false); S.board=[null,null,null,null,null]; S.act={t:'h',i:0,j:0}; save(); render(); compute(); };
+
+/* ---------- equity engine ---------- */
+let job=0;
+function ready(){ return S.hands.every((h,i)=>S.rnd[i]||(h[0]!=null&&h[1]!=null)) && S.hands.some((h,i)=>!S.rnd[i]) && [0,3,4,5].includes(nb()); }
+// exact enumeration (all hands known) or Monte Carlo (random hands); runs in slices
+function equityJob(hands,rnd,board,id,onProg){
+  return new Promise(res=>{
+    const n=hands.length, win=new Float64Array(n), tieShare=new Float64Array(n); let cnt=0;
+    const dead=new Set(board); hands.forEach((h,i)=>{ if(!rnd[i]) h.forEach(c=>dead.add(c)); });
+    const deck=[]; for(let c=0;c<52;c++) if(!dead.has(c)) deck.push(c);
+    const need=5-board.length, anyRnd=rnd.some(x=>x);
+    const sc=new Array(n);
+    const score=(b,hs)=>{ let best=-1,nb=0; for(let i=0;i<n;i++){ sc[i]=evalHand([hs[i][0],hs[i][1],...b]); if(sc[i]>best){best=sc[i];nb=1;} else if(sc[i]===best) nb++; }
+      for(let i=0;i<n;i++) if(sc[i]===best){ if(nb===1) win[i]++; else tieShare[i]+=1/nb; } cnt++; };
+    if(!anyRnd){
+      // enumerate combinations of `need` cards from deck
+      const D=deck.length; const idx=[]; for(let k=0;k<need;k++) idx.push(k);
+      let total=1; for(let k=0;k<need;k++) total=total*(D-k)/(k+1);
+      if(need===0){ score(board,hands); return res({win,tieShare,cnt,exact:true}); }
+      const step=()=>{ if(id!==job) return res(null); const t0=performance.now();
+        while(performance.now()-t0<24){
+          const b=board.slice(); for(let k=0;k<need;k++) b.push(deck[idx[k]]); score(b,hands);
+          let k=need-1; while(k>=0&&idx[k]===D-need+k) k--; if(k<0) return res({win,tieShare,cnt,exact:true});
+          idx[k]++; for(let m=k+1;m<need;m++) idx[m]=idx[m-1]+1;
+        }
+        onProg(cnt/total); setTimeout(step,0); };
+      step();
+    } else {
+      const ITER=need===0&&false?1:120000; const hs=hands.map(h=>h.slice());
+      const step=()=>{ if(id!==job) return res(null); const t0=performance.now();
+        while(performance.now()-t0<24 && cnt<ITER){
+          // shuffle-pick
+          const pool=deck.slice(); let pl=pool.length; const take=()=>{ const r=(Math.random()*pl)|0; const c=pool[r]; pool[r]=pool[--pl]; return c; };
+          for(let i=0;i<n;i++) if(rnd[i]){ hs[i][0]=take(); hs[i][1]=take(); }
+          const b=board.slice(); for(let k=0;k<need;k++) b.push(take()); score(b,hs);
+        }
+        onProg(cnt/ITER); if(cnt>=ITER) return res({win,tieShare,cnt,exact:false}); setTimeout(step,0); };
+      step();
+    }
+  });
+}
+const RN_GEN={12:'тузов',11:'королей',10:'дам',9:'валетов',8:'десяток',7:'девяток',6:'восьмёрок',5:'семёрок',4:'шестёрок',3:'пятёрок',2:'четвёрок',1:'троек',0:'двоек'};
+const RN_TO={12:'туза',11:'короля',10:'дамы',9:'валета',8:'десятки',7:'девятки',6:'восьмёрки',5:'семёрки',4:'шестёрки',3:'пятёрки',2:'четвёрки',1:'тройки',0:'двойки'};
+const RN_NOM={12:'туз',11:'король',10:'дама',9:'валет',8:'десятка',7:'девятка',6:'восьмёрка',5:'семёрка',4:'шестёрка',3:'пятёрка',2:'четвёрка',1:'тройка',0:'двойка'};
+function handName(s){ const c=Math.floor(s/1e6), v=s%1e6;
+  switch(c){ case 8: return v%13===12?'роял-флеш':`стрит-флеш до ${RN_TO[v]}`; case 7: return `каре ${RN_GEN[Math.floor(v/13)]}`;
+    case 6: return `фулл-хаус: три ${RN_GEN[Math.floor(v/13)]} и две ${RN_GEN[v%13]}`; case 5: return `флеш, старшая ${RN_NOM[Math.floor(v/28561)]}`;
+    case 4: return `стрит до ${RN_TO[v]}`; case 3: return `сет / трипс ${RN_GEN[Math.floor(v/169)]}`;
+    case 2: return `две пары: ${RN_GEN[Math.floor(v/169)]} и ${RN_GEN[Math.floor(v/13)%13]}`; case 1: return `пара ${RN_GEN[Math.floor(v/2197)]}`;
+    default: return `старшая карта ${RN_NOM[Math.floor(v/28561)]}`; } }
+const STREETS=[['Префлоп',0],['Флоп',3],['Тёрн',4],['Ривер',5]];
+let cache={};
+async function compute(){
+  const id=++job; $('prog').style.width='0';
+  if(!ready()){ $('quick').innerHTML=''; $('eq').innerHTML=`<div class="hint">${S.hands.filter((h,i)=>!S.rnd[i]).length?'Выбери обе карты каждой руки. Стол можно оставить пустым — тогда посчитаю префлоп.':'Хотя бы одна рука должна быть выбрана.'}${nb()===1||nb()===2?' На столе должно быть 3, 4 или 5 карт.':''}</div>`; $('streets').innerHTML=''; $('status').textContent=''; $('madeWrap').hidden=true; $('outsWrap').hidden=true; return; }
+  const hands=S.hands.map(h=>h.slice()), rnd=S.rnd.slice(), n=hands.length;
+  const curN=nb(), board=S.board.filter(c=>c!=null);
+  // streets to compute: each prefix up to current board
+  const todo=STREETS.filter(([,k])=>k<=curN);
+  const results={};
+  renderStreets(todo,results,n);
+  $('status').textContent='Считаю…';
+  // current street first (shown on top), then earlier ones
+  const order=[todo[todo.length-1],...todo.slice(0,-1)];
+  for(const [nm,k] of order){
+    const key=JSON.stringify([hands,rnd,board.slice(0,k)]);
+    let r=cache[key];
+    if(!r){ r=await equityJob(hands,rnd,board.slice(0,k),id,p=>{ $('prog').style.width=(p*100).toFixed(1)+'%'; }); if(!r) return; cache[key]=r; }
+    results[nm]=r; renderStreets(todo,results,n);
+    if(k===curN) renderEq(r,n);
+  }
+  $('prog').style.width='100%';
+  const cur=results[todo[todo.length-1][0]];
+  $('status').textContent=cur.exact?`Точный расчёт: перебраны все ${cur.cnt.toLocaleString('ru-RU')} вариантов стола.`:`Оценка по ${cur.cnt.toLocaleString('ru-RU')} случайным раздачам, погрешность около ±0,3%.`;
+  renderMade(hands,rnd,board,n); renderOuts(hands,rnd,board,n);
+}
+function renderEq(r,n){
+  $('quick').innerHTML=Array.from({length:n},(_,i)=>`<span><i style="background:var(${PC[i]})"></i>${pct((r.win[i]+r.tieShare[i])/r.cnt)}</span>`).join('')+`<span style="font-family:var(--body);font-weight:600">↓ подробнее ниже</span>`;
+  $('eq').innerHTML=Array.from({length:n},(_,i)=>{ const w=r.win[i]/r.cnt, t=r.tieShare[i]/r.cnt, tot=w+t;
+    return `<div class="eqrow" style="margin-bottom:8px"><span class="nm"><span class="dot" style="background:var(${PC[i]})"></span>${S.rnd[i]?'Случайная':handLabel(i)}</span><div class="bar" title="Выигрыш ${pct(w)}, ничья ${pct(t)}"><i style="width:${w*100}%;background:var(${PC[i]})"></i><i class="tie" style="width:${t*100}%"></i></div><b>${pct(tot)}</b></div>`; }).join('')
+   +`<div class="hint">Доля банка: выигрыш + половина ничьих. Штриховка — ничья.</div>`;
+}
+function handLabel(i){ const h=S.hands[i]; return h.map(c=>`<span class="lab su-${SUITS[c&3]}">${RANKS[c>>2].replace('T','10')}${SUIT_SYM[SUITS[c&3]]}\uFE0E</span>`).join(' '); }
+function renderStreets(todo,results,n){
+  const cells=(nm)=>{ const r=results[nm]; if(!r) return Array.from({length:n},()=>'<span class="c na">…</span>').join('');
+    const eqs=Array.from({length:n},(_,i)=>(r.win[i]+r.tieShare[i])/r.cnt); const mx=Math.max(...eqs);
+    return eqs.map((e,i)=>`<span class="c${e===mx&&n>1?' lead':''}" style="${e===mx&&n>1?`background:var(${PC[i]})`:''}">${pct(e,0)}</span>`).join(''); };
+  $('streets').style.setProperty('--n',n);
+  $('streets').innerHTML=`<div class="st head" style="--n:${n}"><span></span>${Array.from({length:n},(_,i)=>`<span class="c" style="color:var(${PC[i]})">${S.rnd[i]?'случ.':NAMES[i].replace('Рука ','№')}</span>`).join('')}</div>`
+    +STREETS.map(([nm,k])=>todo.find(t=>t[0]===nm)?`<div class="st" style="--n:${n}"><span class="h">${nm}</span>${cells(nm)}</div>`:`<div class="st" style="--n:${n}"><span class="h">${nm}</span>${Array.from({length:n},()=>'<span class="c na">—</span>').join('')}</div>`).join('')
+    +`<div class="hint" style="margin-top:4px">Добавляй карты на стол — увидишь, как меняются шансы от улицы к улице.</div>`;
+}
+function renderMade(hands,rnd,board,n){
+  if(board.length<3){ $('madeWrap').hidden=true; return; }
+  $('madeWrap').hidden=false;
+  const sc=hands.map((h,i)=>rnd[i]?null:evalHand([...h,...board])); const best=Math.max(...sc.filter(x=>x!=null));
+  $('made').innerHTML=hands.map((h,i)=>`<div><span class="dot" style="background:var(${PC[i]})"></span><b>${NAMES[i]}:</b> ${rnd[i]?'случайная рука':handName(sc[i])+(sc[i]===best&&sc.filter(x=>x===best).length===1&&!rnd.some(x=>x)?' — впереди':'')}</div>`).join('');
+}
+function renderOuts(hands,rnd,board,n){
+  if(board.length<3||board.length>4||rnd.some(x=>x)){ $('outsWrap').hidden=true; return; }
+  const dead=new Set([...board,...hands.flat()]); const now=hands.map(h=>evalHand([...h,...board])); const lead=Math.max(...now);
+  const out=hands.map(()=>[]);
+  for(let c=0;c<52;c++){ if(dead.has(c)) continue; const s=hands.map(h=>evalHand([...h,...board,c])); const mx=Math.max(...s); const w=s.filter(x=>x===mx).length;
+    s.forEach((v,i)=>{ if(v===mx&&w===1&&now[i]!==lead) out[i].push(c); }); }
+  const rows=hands.map((h,i)=>now[i]===lead?'':`<div><b style="color:var(${PC[i]})">${NAMES[i]}</b> выходит вперёд на ${board.length===3?'тёрне':'ривере'} с ${out[i].length} ${out[i].length%10===1&&out[i].length!==11?'картой':'картами'}${out[i].length?':':''}<br>${out[i].sort((a,b)=>b-a).map(c=>`<span class="oc">${cardInner(c)}</span>`).join('')}</div>`).filter(Boolean);
+  $('outsWrap').hidden=!rows.length;
+  $('outs').innerHTML=rows.join('')+(rows.length?`<div class="hint">Карты, после которых рука становится лучшей прямо на следующей улице. ${board.length===3?'Шансы выше учитывают и тёрн, и ривер.':''}</div>`:'');
+}
+
+/* ---------- combos list ---------- */
+const C=(r,s)=>RANKS.indexOf(r)*4+SUITS.indexOf(s);
+const COMBOS=[
+  ['Роял-флеш','A K Q J 10 одной масти','~0,003%',[['A','h'],['K','h'],['Q','h'],['J','h'],['T','h']]],
+  ['Стрит-флеш','пять подряд одной масти','~0,03%',[['9','s'],['8','s'],['7','s'],['6','s'],['5','s']]],
+  ['Каре','четыре одинаковые','~0,17%',[['7','c'],['7','d'],['7','h'],['7','s'],['K','d',1]]],
+  ['Фулл-хаус','тройка + пара','~2,6%',[['K','s'],['K','h'],['K','d'],['4','c'],['4','s']]],
+  ['Флеш','пять одной масти','~3%',[['A','d'],['J','d'],['8','d'],['6','d'],['2','d']]],
+  ['Стрит','пять подряд, масть любая','~4,6%',[['T','c'],['9','d'],['8','h'],['7','s'],['6','c']]],
+  ['Сет / трипс','три одинаковые','~4,8%',[['Q','c'],['Q','d'],['Q','s'],['9','h',1],['4','c',1]]],
+  ['Две пары','две пары','~23%',[['J','h'],['J','c'],['8','s'],['8','d'],['A','c',1]]],
+  ['Пара','две одинаковые','~44%',[['A','s'],['A','d'],['K','c',1],['7','h',1],['3','s',1]]],
+  ['Старшая карта','ничего не собрано','~17%',[['A','c'],['K','d',1],['9','h',1],['6','s',1],['3','c',1]]],
+];
+$('combosList').innerHTML=COMBOS.map(([n,d,p,cs],i)=>`<div class="cb"><div class="cs">${cs.map(([r,s,dim])=>{ const c=C(r,s); return `<span class="k${dim?' dim':''}">${cardInner(c)}</span>`; }).join('')}</div><b>${i+1}. ${n}</b><span>${d} · за 7 карт ${p}</span></div>`).join('');
+
+/* ---------- start ---------- */
+if(S.hands.every(h=>h.every(c=>c==null))&&S.board.every(c=>c==null)){ // demo: AK vs QQ
+  S.hands=[[C('A','s'),C('K','s')],[C('Q','h'),C('Q','d')]]; S.rnd=[false,false]; }
+S.act=nextEmpty(); render(); compute();
+</script>
+<script src="site.js" defer></script>
+</body>
+</html>
